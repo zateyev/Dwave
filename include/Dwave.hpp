@@ -8,12 +8,14 @@
 #include <cstdlib>
 #include <GL/glew.h>
 // #include <GL/glext.h>
-#include <GL/glut.h>
+// #include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform2.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <math.h>
 
 #include "texture.hpp"
 #include "shader.hpp"
@@ -101,6 +103,24 @@ namespace dwave {
       float angleX;
       float angleY;
 
+      float lastQuatX;
+      float lastQuatY;
+      float lastQuatZ;
+      float lastQuatAngle;
+
+      // float quatX;
+      // float quatY;
+      // float quatZ;
+      // float quatAngle;
+
+      float cam_pos_x;
+      float cam_pos_y;
+      float cam_pos_z;
+
+      float cam_up_x;
+      float cam_up_y;
+      float cam_up_z;
+
       int main_window;
 
       /** Pointers to the windows and some of the controls we'll create **/
@@ -145,7 +165,12 @@ namespace dwave {
 
       void setAngles(float x, float y);
 
+      // void setQuat(float x, float y, float z, float angle);
+      void setQuat(float px, float py, float pz, float ux, float uy, float uz);
+
       void startDwave(int argc, char** argv);
+
+      void stopDwave();
 
       void calculateFrameRate();
 

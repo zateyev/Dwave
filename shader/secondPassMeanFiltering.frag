@@ -12,13 +12,13 @@ uniform float uSteps;
 uniform float l;
 uniform float s;
 
-float xw = 449.0;
-float yw = 449.0;
-float zw = 449.0;
-
-// float xw = 256.0;
-// float yw = 256.0;
+// float xw = 449.0;
+// float yw = 449.0;
 // float zw = 449.0;
+
+float xw = 256.0;
+float yw = 256.0;
+float zw = 449.0;
 
 // float xw = 419.0;
 // float yw = 492.0;

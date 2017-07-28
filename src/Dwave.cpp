@@ -33,7 +33,7 @@ namespace dwave {
 
     rotationX = 0.0;
     rotationY = 0.0;
-    FoV = 40.0f;
+    FoV = 50.0f;
 
     xx = 0;
     yy = 0;
@@ -42,6 +42,24 @@ namespace dwave {
 
     angleX = 0;
     angleY = 0;
+
+    lastQuatX = 0.0f;
+    lastQuatY = 0.0f;
+    lastQuatZ = 0.0f;
+    lastQuatAngle = 0.0f;
+
+    // quatX = 0.0f;
+    // quatY = 0.0f;
+    // quatZ = 0.0f;
+    // quatAngle = 0.0f;
+
+    cam_pos_x = 0.0f;
+    cam_pos_y = 0.0f;
+    cam_pos_z = 3.0f;
+
+    cam_up_x = 0.0f;
+    cam_up_y = 1.0f;
+    cam_up_z = 0.0f;
   }
 
   Dwave::~Dwave() {
@@ -110,8 +128,8 @@ namespace dwave {
     Texture texture;
     // texture.initVol3DTex("../final.screw_joint.raw", &pngTex, 419, 492, 462);
     // texture.initVol3DTex("../breast2.raw", &pngTex, 256, 256, 256);
-    // texture.initVol3DTex("../wasp.raw", &pngTex, 256, 256, 449);
-    texture.initVol3DTex("../wasp_3.raw", &pngTex, 449, 449, 449);
+    texture.initVol3DTex("../wasp.raw", &pngTex, 256, 256, 449);
+    // texture.initVol3DTex("../wasp_3.raw", &pngTex, 449, 449, 449);
     // texture.initVol3DTex("../256.raw", &pngTex, 256, 256, 252);
     // texture.initVol3DTex("../archie.raw", &pngTex, 1536, 1536, 1152);
     // texture.initVol3DTex("../eucrib.raw", &pngTex, 1536, 1536, 1152);
@@ -133,28 +151,52 @@ namespace dwave {
     angleY = y;
   }
 
+  // void Dwave::setQuat(float x, float y, float z, float angle) {
+  //   quatX = x;
+  //   quatY = y;
+  //   quatZ = z;
+  //   quatAngle = angle;
+  //   cout << angle << "; x = " << setprecision(18) << x << endl;
+  // }
+
+  void Dwave::setQuat(float px, float py, float pz, float ux, float uy, float uz) {
+    cam_pos_x = px;
+    cam_pos_y = py;
+    cam_pos_z = pz;
+
+    cam_up_x = ux;
+    cam_up_y = uy;
+    cam_up_z = uz;
+  }
+
   void Dwave::render(GLenum cullFace) {
       glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       //  transform the box
       glm::mat4 projection = glm::perspective(glm::radians(FoV), (GLfloat)g_winWidth / g_winHeight, 0.1f, 400.f);
 
-      glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
-               glm::vec3(0.0f, 0.0f, 0.0f),
-               glm::vec3(0.0f, 1.0f, 0.0f));
+      // glm::vec3 eye = glm::vec3(0.0f, 0.0f, 3.0f);
+      // glm::vec3 objectUp = glm::vec3(0.0f, 1.0f, 0.0f);
+      //
+      // glm::mat4 view = glm::lookAt(eye, // eye
+      //          glm::vec3(0.0f, 0.0f, 0.0f), // center
+      //          objectUp); // up
+
+      glm::mat4 view = glm::lookAt(glm::vec3(cam_pos_x, cam_pos_y, cam_pos_z), // eye
+               glm::vec3(0.0f, 0.0f, 0.0f), // center
+               glm::vec3(cam_up_x, cam_up_y, cam_up_z)); // up
 
       glm::mat4 model = mat4(1.0f);
+
       model *= glm::rotate(glm::radians((float)g_angle), glm::vec3(0.0f, 1.0f, 0.0f));
-      // to make the "head256.raw" i.e. the volume data stand up.
-      //model *= glm::rotate(180.0f, vec3(1.0f, 0.0f, 0.0f));
 
       model *= glm::rotate(glm::radians(angleX), vec3(0.0f, 1.0f, 0.0f));
-      model *= glm::rotate((3.141592f + glm::radians(angleY)), vec3(1.0f, 0.0f, 0.0f));
+      model *= glm::rotate(glm::radians(angleY), vec3(1.0f, 0.0f, 0.0f));
 
       // glm::quat myQuat;
-      // myQuat = glm::quat(0.3, 0.307107, 0.3, 0.700);
+      // myQuat = glm::quat(quatAngle, quatX, quatY, quatZ);
       // glm::mat4 RotationMatrix = glm::toMat4(myQuat);
-      // model = RotationMatrix * model;
+      // model *= RotationMatrix;
 
       model *= glm::translate(glm::vec3(-0.5f, -0.5f, -0.5f));
       // notice the multiplication order: reverse order of transform
@@ -386,11 +428,11 @@ namespace dwave {
   }
 
   void Dwave::motion(int x, int y) {
-    rotationX += (float)(y - last_y);
-    rotationY += (float)(x - last_x);
+    rotationX += (float)(x - last_x);
+    rotationY += (float)(y - last_y);
 
-    angleY = 180 * rotationX / g_winWidth;
-    angleX = 180 * rotationY / g_winHeight;
+    angleX = 180 * rotationX / g_winWidth;
+    angleY = 180 * rotationY / g_winHeight;
 
     last_x = x;
     last_y = y;
@@ -418,7 +460,7 @@ namespace dwave {
   }
 
   void Dwave::rotateDisplay() {
-    g_angle = (g_angle + 1) % 360;
+    // g_angle = (g_angle + 1) % 360;
     glutPostRedisplay();
   }
 
@@ -436,9 +478,10 @@ namespace dwave {
     render(GL_FRONT);
     glUseProgram(0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    tx = (g_winWidth - tw) / 2;
-    ty = (g_winHeight - th) / 2;
-    glViewport(-tx, -ty, g_winWidth, g_winHeight);
+    // tx = (g_winWidth - tw) / 2;
+    // ty = (g_winHeight - th) / 2;
+    // glViewport(-tx, -ty, g_winWidth, g_winHeight);
+    glViewport(-621, -117, g_winWidth, g_winHeight);
     Shader::linkShader(shader.get_programHandle(), g_rcVertHandle, g_rcFragHandle);
     glUseProgram(shader.get_programHandle());
     rcSetUinforms();
@@ -451,17 +494,25 @@ namespace dwave {
     min_gr_label->set_text(cstr);
     delete [] cstr;
 
-    glutSwapBuffers();
+    // screenshot_png("scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+    screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+    glutLeaveMainLoop();
 
-    // char filename[SCREENSHOT_MAX_FILENAME];
-    // snprintf(filename, SCREENSHOT_MAX_FILENAME, "tmp%d.png", nframes);
-    // screenshot_png(filename, WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
-    // exit(EXIT_SUCCESS);
+    // if (lastQuatX != quatX || lastQuatY != quatY || lastQuatZ != quatZ || lastQuatAngle != quatAngle) {
+    //   screenshot_png("scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+    //   lastQuatX = quatX;
+    //   lastQuatY = quatY;
+    //   lastQuatZ = quatZ;
+    //   lastQuatAngle = quatAngle;
+    //   glutLeaveMainLoop();
+    // }
 
     // nframes++;
     // if (model_finished) {
     //   exit(EXIT_SUCCESS);
     // }
+
+    glutSwapBuffers();
   }
 
   void Dwave::displayWrapper() {
@@ -502,8 +553,8 @@ namespace dwave {
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-    glutInitWindowPosition( 50, 50 );
-    glutInitWindowSize(900, 800);
+    glutInitWindowPosition(1900, 1130);
+    glutInitWindowSize(800, 800); // (900, 800)
 
     main_window = glutCreateWindow("OpenGL VRC");
     GLenum err = glewInit();
@@ -598,7 +649,19 @@ namespace dwave {
     // delete sb;
     // delete spinner;
 
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
     glutMainLoop();
+
+    // glutMainLoopEvent();
+    // while(1)
+    // {
+    //   glutMainLoopEvent();
+    // }
+  }
+
+  void Dwave::stopDwave() {
+    cout << "stop Dwave" << endl;
+    glutDestroyWindow(main_window);
   }
 
   Dwave* Dwave::instance = NULL;
@@ -619,5 +682,17 @@ extern "C" {
 
     void Dwave_start(dwave::Dwave* dwave) {
       dwave->startDwave(0, NULL);
+    }
+
+    // void Dwave_set_quat(dwave::Dwave* dwave, float x, float y, float z, float angle) {
+    //   dwave->setQuat(x, y, z, angle);
+    // }
+
+    void Dwave_set_quat(dwave::Dwave* dwave, float px, float py, float pz, float ux, float uy, float uz) {
+      dwave->setQuat(px, py, pz, ux, uy, uz);
+    }
+
+    void Dwave_stop(dwave::Dwave* dwave) {
+      dwave->stopDwave();
     }
 }
