@@ -14,7 +14,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform2.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <math.h>
 
 #include "texture.hpp"
@@ -69,49 +68,33 @@ namespace dwave {
       GLuint pngTex;
       GLuint trTex;
 
-      float g_NumberOfSlices;
-      int png_width;
-      int png_height;
-      int maxTexturesNumber;
-      float g_SlicesOverX;
-      float g_SlicesOverY;
-      std::string datasetDir;
+      // int maxTexturesNumber;
       int uSetViewMode;
+      int uFilterType;
 
       float g_stepSize;
       float g_MinGrayVal;
       float g_MaxGrayVal;
-      float g_OpacityVal;
-      float g_ColorVal;
-      float g_AbsorptionModeIndex;
+      // float g_OpacityVal;
+      // float g_ColorVal;
       float cyl_rad;
 
 
-      int tr_width;
-      int tr_height;
+      // int tr_width;
+      // int tr_height;
 
       int last_x, last_y;
       float rotationX;
       float rotationY;
       float FoV;
 
-      int xx;
-      int yy;
       int ww;
       int hh;
 
       float angleX;
       float angleY;
 
-      float lastQuatX;
-      float lastQuatY;
-      float lastQuatZ;
-      float lastQuatAngle;
-
-      // float quatX;
-      // float quatY;
-      // float quatZ;
-      // float quatAngle;
+      float lastCam_pos_x;
 
       float cam_pos_x;
       float cam_pos_y;
@@ -120,6 +103,16 @@ namespace dwave {
       float cam_up_x;
       float cam_up_y;
       float cam_up_z;
+
+      float zBottom;
+      float zTop;
+
+      float lights[9];
+
+      float value1;
+      float value2;
+      int value3;
+      float value4;
 
       int main_window;
 
@@ -165,8 +158,7 @@ namespace dwave {
 
       void setAngles(float x, float y);
 
-      // void setQuat(float x, float y, float z, float angle);
-      void setQuat(float px, float py, float pz, float ux, float uy, float uz);
+      void setCameraSettings(float px, float py, float pz, float ux, float uy, float uz);
 
       void startDwave(int argc, char** argv);
 

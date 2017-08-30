@@ -20,8 +20,12 @@ vec3 getNormal(vec3 at)
     // float yw = 492.0;
     // float zw = 462.0;
 
-    float xw = 256.0;
-    float yw = 256.0;
+    // float xw = 256.0;
+    // float yw = 256.0;
+    // float zw = 256.0;
+
+    float xw = 449.0;
+    float yw = 449.0;
     float zw = 449.0;
 
     vec3 texpos1;
@@ -373,6 +377,8 @@ void main(void)
                 sample.rgb += cookTorranceSpecular(N, L, V, roughnessValue, F0, k);
               }
             }
+
+            // sample.rgb += (Iamb + Idif + Ispe);
 
             accum += sample;
             if(accum.a >= 1.0)

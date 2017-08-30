@@ -30,10 +30,11 @@ uniform float uColorVal;
 uniform float uAbsorptionModeIndex;
 uniform float uSteps;
 
+uniform int uValue3;
+
 // x - R, y - G, z - B
 // x - H, y - S, z - V
-vec3 hsv2rgb(vec3 hsv)
-{
+vec3 hsv2rgb(vec3 hsv) {
     float     hue, p, q, t, ff;
     int        i;
     //"opacity_factor": 40,
@@ -89,8 +90,7 @@ vec3 hsv2rgb(vec3 hsv)
         return vec3(hsv.z,p,q);
 }
 
-vec3 getNormal(vec3 at)
-{
+vec3 getNormal(vec3 at) {
     // float xw = 419.0;
     // float yw = 492.0;
     // float zw = 462.0;
@@ -312,8 +312,7 @@ vec3 getNormal(vec3 at)
 // returns intensity of reflected ambient lighting
 // const vec3 lightColor = vec3(1.0, 0.88, 0.74);
 const vec3 u_intensity = vec3(0.1, 0.1, 0.1);
-vec3 ambientLighting(const vec3 lightColor)
-{
+vec3 ambientLighting(const vec3 lightColor) {
     const vec3 u_matAmbientReflectance = lightColor;
     // const vec3 u_lightAmbientIntensity = vec3(0.6, 0.3, 0.0);
     const vec3 u_lightAmbientIntensity = u_intensity;
@@ -321,8 +320,7 @@ vec3 ambientLighting(const vec3 lightColor)
     return u_matAmbientReflectance * u_lightAmbientIntensity;
 }
 // returns intensity of diffuse reflection
-vec3 diffuseLighting(in vec3 N, in vec3 L, const vec3 lightColor)
-{
+vec3 diffuseLighting(in vec3 N, in vec3 L, const vec3 lightColor) {
     const vec3 u_matDiffuseReflectance = lightColor;
     // const vec3 u_lightDiffuseIntensity = vec3(1.0, 0.5, 0);
     const vec3 u_lightDiffuseIntensity = vec3(0.6, 0.6, 0.6);
@@ -337,8 +335,7 @@ vec3 diffuseLighting(in vec3 N, in vec3 L, const vec3 lightColor)
     return u_matDiffuseReflectance * u_lightDiffuseIntensity * diffuseTerm;
 }
 // returns intensity of specular reflection
-vec3 specularLighting(in vec3 N, in vec3 L, in vec3 V, const vec3 lightColor)
-{
+vec3 specularLighting(in vec3 N, in vec3 L, in vec3 V, const vec3 lightColor) {
     float specularTerm = 0.0;
     // const vec3 u_lightSpecularIntensity = vec3(0, 1, 0);
     const vec3 u_lightSpecularIntensity = u_intensity;
@@ -358,7 +355,6 @@ vec3 specularLighting(in vec3 N, in vec3 L, in vec3 V, const vec3 lightColor)
    }
    return u_matSpecularReflectance * u_lightSpecularIntensity * specularTerm;
 }
-
 
 float beckmannDistribution(float x, float roughness) {
   float NdotH = max(x, 0.0001);
@@ -478,6 +474,8 @@ void main(void) {
           float F0 = 5.0; // fresnel reflectance at normal incidence
           float k = 0.7; // fraction of diffuse reflection (specular reflection = 1 - k)
 
+// if (uValue3 == 4) {
+
           for(int i = 0; i < 3; ++i) {
             vec3 L = normalize(lightPos[i] - currentPosition);
             if (uSetViewMode == 0) { // Blinn-Phong shading mode
@@ -485,12 +483,20 @@ void main(void) {
                 vec3 Idif = diffuseLighting(N, L, accumulatedColor.rgb);
                 vec3 Ispe = specularLighting(N, L, V, accumulatedColor.rgb);
 
+                // vec3 Iamb = ambientLighting(vec3(0.2, 0.5, 0.7));
+                // vec3 Idif = diffuseLighting(N, L, vec3(0.2, 0.5, 0.7));
+                // vec3 Ispe = specularLighting(N, L, V, vec3(0.2, 0.5, 0.7));
+
                 sample.rgb += (Iamb + Idif + Ispe);
+                // sample.rgb += (Iamb + Ispe);
             }
             else if(uSetViewMode == 1) { // Cook-Torrance mode
               sample.rgb += cookTorranceSpecular(N, L, V, roughnessValue, F0, k, accumulatedColor.rgb);
             }
           }
+// }
+// else
+          // sample.rgb += accumulatedColor.rgb;
 
           accum = sample;
           break;

@@ -1,43 +1,108 @@
-precision mediump int;
-precision mediump float;
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+ // highp is supported
+ precision highp int;
+ precision highp float;
+#else
+ // high is not supported
+ precision mediump int;
+ precision mediump float;
+#endif
+
+// Passed from vertex
 varying vec4 frontColor;
 varying vec4 pos;
+
+// Passed from core
 uniform sampler2D uBackCoord;
+uniform sampler1D uTransferFunction;
 uniform sampler3D uSliceMaps;
-uniform vec3 uLightPos;
 uniform int uSetViewMode;
+
+// Assuming a bounding box of 256x256x256
+// ceil( sqrt(3) * 256 ) = 444
+const int MAX_STEPS = 444;
+
+// Application specific parameters
 uniform float uMinGrayVal;
 uniform float uMaxGrayVal;
+uniform float uOpacityVal;
+uniform float uColorVal;
+uniform float uAbsorptionModeIndex;
 uniform float uSteps;
-uniform float uCylRad;
 
-// float xw = 449.0;
-// float yw = 449.0;
-// float zw = 449.0;
+uniform int uValue3;
 
-// float xw = 256.0;
-// float yw = 256.0;
-// float zw = 252.0;
+// x - R, y - G, z - B
+// x - H, y - S, z - V
+vec3 hsv2rgb(vec3 hsv) {
+    float     hue, p, q, t, ff;
+    int        i;
+    //"opacity_factor": 40,
+    //"color_factor": 0.4,
+    //"x_min": 0,
+    //"x_max": 1,
+    //"l": 5,
+    //"s" : 1,
+    //"hMin" : -0.5,
+    //"hMax" : 1,
+    //"minRefl" : 0,
+    //"minSos" : 0,
+    //"minAtten" : 0,
+    //"maxRefl" : 100,
+    //"maxSos" : 100,
+    //"maxAtten" : 100,
 
-// float xw = 1536.0;
-// float yw = 1536.0;
-// float zw = 1152.0;
+    float darkness = 0.4;
+    float l = 5.0;
+    float s = 1.0;
+    float hMin = -0.5;
+    float hMax = 1.0;
 
-float xw = 512.0;
-float yw = 512.0;
-float zw = 512.0;
+    hsv.z = (darkness - hsv.z) * l;
+    hsv.x = (hsv.x - hMin)/(hMax - hMin) * 360.0;
+    hsv.y *= s * 1.5;
 
-// float xw = 419.0;
-// float yw = 492.0;
-// float zw = 462.0;
+    hue=hsv.x >= 360.0?hsv.x-360.0:hsv.x;
 
-// Compute the Normal around the current voxel
-vec3 getNormal(vec3 at)
-{
+    hue /= 60.0;
+    i = int(hue);
+    ff = hue - float(i);
+    p = hsv.z * (1.0 - hsv.y);
+    q = hsv.z * (1.0 - (hsv.y * ff));
+    t = hsv.z * (1.0 - (hsv.y * (1.0 - ff)));
+
+    if(i==0)
+        return vec3(hsv.z,t,p);
+
+    else if(i==1)
+      return vec3(q,hsv.z,p);
+
+    else if(i==2)
+        return vec3(p,hsv.z,t);
+
+    else if(i==3)
+        return vec3(p,q,hsv.z);
+
+    else if(i==4)
+        return vec3(t,p,hsv.z);
+
+    else
+        return vec3(hsv.z,p,q);
+}
+
+vec3 getNormal(vec3 at) {
+    // float xw = 419.0;
+    // float yw = 492.0;
+    // float zw = 462.0;
+
+    float xw = 256.0;
+    float yw = 256.0;
+    float zw = 256.0;
+
     vec3 texpos1;
 
-    float w0 = (at.z - (1.0/zw)) - floor(at.z);
     float w1 = at.z - floor(at.z);
+    float w0 = (at.z - (1.0/zw)) - floor(at.z);
     float w2 = (at.z + (1.0/zw)) - floor(at.z);
 
     float fx, fy, fz;
@@ -46,7 +111,6 @@ vec3 getNormal(vec3 at)
     float H0, H1, H2, H3, H4, H5, H6, H7, H8;
 
     texpos1.z = at.z - 1.0/zw;
-
     texpos1.x = at.x - 1.0/xw;
     texpos1.y = at.y + 1.0/yw;
     L0 = texture(uSliceMaps, texpos1).x;
@@ -85,7 +149,6 @@ vec3 getNormal(vec3 at)
 
 
     texpos1.z = at.z + 1.0/zw;
-
     texpos1.x = at.x - 1.0/xw;
     texpos1.y = at.y + 1.0/yw;
     H0 = texture(uSliceMaps, texpos1).x;
@@ -247,10 +310,9 @@ vec3 getNormal(vec3 at)
     return n;
 }
 // returns intensity of reflected ambient lighting
-const vec3 lightColor = vec3(1.0, 0.88, 0.74);
+// const vec3 lightColor = vec3(1.0, 0.88, 0.74);
 const vec3 u_intensity = vec3(0.1, 0.1, 0.1);
-vec3 ambientLighting()
-{
+vec3 ambientLighting(const vec3 lightColor) {
     const vec3 u_matAmbientReflectance = lightColor;
     // const vec3 u_lightAmbientIntensity = vec3(0.6, 0.3, 0.0);
     const vec3 u_lightAmbientIntensity = u_intensity;
@@ -258,8 +320,7 @@ vec3 ambientLighting()
     return u_matAmbientReflectance * u_lightAmbientIntensity;
 }
 // returns intensity of diffuse reflection
-vec3 diffuseLighting(in vec3 N, in vec3 L)
-{
+vec3 diffuseLighting(in vec3 N, in vec3 L, const vec3 lightColor) {
     const vec3 u_matDiffuseReflectance = lightColor;
     // const vec3 u_lightDiffuseIntensity = vec3(1.0, 0.5, 0);
     const vec3 u_lightDiffuseIntensity = vec3(0.6, 0.6, 0.6);
@@ -274,8 +335,7 @@ vec3 diffuseLighting(in vec3 N, in vec3 L)
     return u_matDiffuseReflectance * u_lightDiffuseIntensity * diffuseTerm;
 }
 // returns intensity of specular reflection
-vec3 specularLighting(in vec3 N, in vec3 L, in vec3 V)
-{
+vec3 specularLighting(in vec3 N, in vec3 L, in vec3 V, const vec3 lightColor) {
     float specularTerm = 0.0;
     // const vec3 u_lightSpecularIntensity = vec3(0, 1, 0);
     const vec3 u_lightSpecularIntensity = u_intensity;
@@ -296,7 +356,6 @@ vec3 specularLighting(in vec3 N, in vec3 L, in vec3 V)
    return u_matSpecularReflectance * u_lightSpecularIntensity * specularTerm;
 }
 
-
 float beckmannDistribution(float x, float roughness) {
   float NdotH = max(x, 0.0001);
   float cos2Alpha = NdotH * NdotH;
@@ -312,7 +371,8 @@ vec3 cookTorranceSpecular(
   vec3 viewDirection,
   float roughness,
   float fresnel,
-  float k) {
+  float k,
+  const vec3 lightColor) {
 
   float VdotN = max(dot(viewDirection, surfaceNormal), 0.0);
   float LdotN = max(dot(lightDirection, surfaceNormal), 0.0);
@@ -338,139 +398,92 @@ vec3 cookTorranceSpecular(
   return lightColor * LdotN * (k + power * (1.0 - k));
 }
 
-float random(vec2 co){
-    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
+void main(void) {
 
-void main(void)
-{
-    vec2 texC = ((pos.xy/pos.w) + 1.0) / 2.0;
-    vec4 backColor = texture2D(uBackCoord, texC);
-    vec3 dir = backColor.rgb - frontColor.rgb;
-    vec4 currentPosition = frontColor;
-    vec3 Step = dir/uSteps;
-    vec4 accum = vec4(0, 0, 0, 0);
-    vec4 sample = vec4(0.0, 0.0, 0.0, 1.0);
+    //Transform the coordinates it from [-1;1] to [0;1]
+    vec2 texc = vec2(((pos.x / pos.w) + 1.0 ) / 2.0,
+                     ((pos.y / pos.w) + 1.0 ) / 2.0);
+
+    //The back position is the world space position stored in the texture.
+    vec3 backPos = texture2D(uBackCoord, texc).xyz;
+
+    //The front position is the world space position of the second render pass.
+    vec3 frontPos = frontColor.rgb;
+
+    //The direction from the front position to back position.
+    vec3 dir = backPos - frontPos;
+    float rayLength = length(dir);
+
+    //Calculate how long to increment in each step.
+    float delta = 1.0 / uSteps;
+
+    // vec3 Step = dir / steps;
+    vec3 Step = dir / uSteps;
+
+    //Start the ray casting from the front position.
+    vec3 currentPosition = frontPos;
+    vec3 posAlongN;
+
+    //The color accumulator.
+    vec4 accumulatedColor = vec4(0.0);
+    vec4 accum = vec4(0.0);
+
+    vec4 colorSample = vec4(0.0);
+    vec4 sample = vec4(0.0);
+    vec4 sample2 = vec4(0.0);
+    vec4 grayValue;
+    vec3 surfColor = vec3(0.45);
+
     vec3 lightPos[3];
-    // lightPos[0] = vec3(1, 1, 1);
-    // lightPos[1] = vec3(-1, -1, -1);
-    // lightPos[2] = vec3(1, 1, -1);
-
-    // lightPos[0] = vec3(-2, 2, 2);
-    // lightPos[1] = vec3(2, -2, 2);
-    // lightPos[2] = vec3(2, -2, -2);
-
     lightPos[0] = vec3(1, 1, 1);
     lightPos[1] = vec3(-1, -1, -1);
     lightPos[2] = vec3(1, 1, -1);
 
-    // lightPos[0] = vec3(1, 0, 1);
-    // lightPos[1] = vec3(0, 1, 1);
-    // lightPos[2] = vec3(0.5, 1, 0);
-
-    // float cylinderRadius = 0.45;
-    float xsqu;
-    float ysqu;
-    float distanceFromCenter;
-
+    //Perform the ray marching iterations
     for(int i = 0; i < uSteps; i++) {
-      xsqu = (0.5 - currentPosition.x) * (0.5 - currentPosition.x);
-      ysqu = (0.5 - currentPosition.y) * (0.5 - currentPosition.y);
-      distanceFromCenter = sqrt(xsqu + ysqu);
-      if (distanceFromCenter < uCylRad && currentPosition.z > 0.1 && currentPosition.z < 0.9) {
-        float gray_val = texture(uSliceMaps, currentPosition.xyz);
-        // if (uSetViewMode == 0 && gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
-        //
-        //   float sum_gray_val = 0.0;
-        //
-        //   int mask_size = 3;
-        //   vec3 offset;
-        //   vec3 curDotPos;
-        //
-        //   for(int i = 0; i < mask_size; ++i) {
-        //     for(int j = 0; j < mask_size; ++j) {
-        //       for(int k = 0; k < mask_size; ++k) {
-        //         offset = vec3((i - (int)mask_size / 2) / xw,
-        //         (j - (int)mask_size / 2) / yw,
-        //         (k - (int)mask_size / 2) / zw);
-        //
-        //         curDotPos = currentPosition.xyz + offset;
-        //         sum_gray_val += texture(uSliceMaps, curDotPos).x;
-        //       }
-        //     }
-        //   }
-        //
-        //   gray_val = sum_gray_val / pow(mask_size, 3);
-        //
-        //   // vec3 dirFromCP[14];
-        //   // dirFromCP[0] = vec3(1.0 / xw, 0.0 / yw, 0.0 / zw);
-        //   // dirFromCP[1] = vec3(0.0 / xw, 1.0 / yw, 0.0 / zw);
-        //   // dirFromCP[2] = vec3(0.0 / xw, 0.0 / yw, 1.0 / zw);
-        //   // dirFromCP[3] = vec3(-1.0 / xw, 0.0 / yw, 0.0 / zw);
-        //   // dirFromCP[4] = vec3(0.0 / xw, -1.0 / yw, 0.0 / zw);
-        //   // dirFromCP[5] = vec3(0.0 / xw, 0.0 / yw, -1.0 / zw);
-        //   //
-        //   // dirFromCP[6] = vec3(-1.0 / xw, 1.0 / yw, 1.0 / zw);
-        //   // dirFromCP[7] = vec3(1.0 / xw, 1.0 / yw, 1.0 / zw);
-        //   // dirFromCP[8] = vec3(1.0 / xw, 1.0 / yw, -1.0 / zw);
-        //   // dirFromCP[9] = vec3(-1.0 / xw, 1.0 / yw, -1.0 / zw);
-        //   // dirFromCP[10] = vec3(-1.0 / xw, -1.0 / yw, 1.0 / zw);
-        //   // dirFromCP[11] = vec3(1.0 / xw, -1.0 / yw, 1.0 / zw);
-        //   // dirFromCP[12] = vec3(1.0 / xw, -1.0 / yw, -1.0 / zw);
-        //   // dirFromCP[13] = vec3(-1.0 / xw, -1.0 / yw, -1.0 / zw);
-        //   // for(int i = 0; i < 14; ++i) {
-        //   //   offset = dirFromCP[i];
-        //   //   curDotPos = currentPosition.xyz + offset;
-        //   //   sum_gray_val += texture(uSliceMaps, curDotPos).x;
-        //   // }
-        //   // gray_val = (sum_gray_val / 14); // * 1.002;
-        //
-        // }
-        if(gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
-          // normalize vectors after interpolation
-          vec3 V = normalize(pos - currentPosition.xyz);
-          vec3 N = normalize(getNormal(currentPosition.xyz));
 
-          // set important material values for cookTorranceSpecular
-          float roughnessValue = 0.6; // 0 : smooth, 1: rough
-          float F0 = 5.0; // fresnel reflectance at normal incidence
-          float k = 0.7; // fraction of diffuse reflection (specular reflection = 1 - k)
+      grayValue = texture(uSliceMaps, currentPosition);
 
-          for(int light_i = 0; light_i < 3; ++light_i) {
-            vec3 L = normalize(lightPos[light_i] - currentPosition.xyz);
-            if (uSetViewMode == 0) { // Blinn-Phong shading mode
+      if (grayValue.g > uMinGrayVal && grayValue.g < uMaxGrayVal) {
+        vec3 V = normalize(pos - currentPosition);
+        vec3 N = normalize(getNormal(currentPosition));
 
-              vec3 Iamb = ambientLighting();
-              vec3 Idif = diffuseLighting(N, L);
-              vec3 Ispe = specularLighting(N, L, V);
-              sample.rgb += (Iamb + Idif + Ispe);
+        // vec3 normStep = normalize(- N / uSteps);
+        vec3 normStep = N / uSteps;
+        posAlongN = currentPosition;
 
-            }
-            else if(uSetViewMode == 1) { // Cook-Torrance mode
-              // sample.rgb += cookTorranceSpecular(N, L, V, roughnessValue, F0, k);
+        for (int j = 0; j < 72; j++) {
 
-              vec3 Iamb = ambientLighting();
-              vec3 Idif = diffuseLighting(N, L);
-              vec3 Ispe = specularLighting(N, L, V);
-              sample.rgb += (Iamb + Idif + Ispe);
-            }
+          if (grayValue.r > 96.0/255.0) {
+            surfColor = vec3(0.8, 0.2, 0.0);
+            break;
           }
 
-          accum += sample;
-          if(accum.a >= 1.0)
-          break;
+          if (grayValue.g > 90.0/255.0) {
+            surfColor = vec3(0.0, 0.8, 0.0);
+            break;
+          }
+
+          grayValue = texture(uSliceMaps, posAlongN);
+          posAlongN.xyz += normStep;
         }
+
+
+        for(int i = 0; i < 3; ++i) {
+          vec3 L = normalize(lightPos[i] - currentPosition);
+
+          vec3 Iamb = ambientLighting(surfColor);
+          vec3 Idif = diffuseLighting(N, L, surfColor);
+          vec3 Ispe = specularLighting(N, L, V, surfColor);
+
+          sample.rgb += (Iamb + Idif + Ispe);
+        }
+        accum += sample;
+        break;
       }
 
-      //advance the current position
       currentPosition.xyz += Step;
 
-      if(currentPosition.x > 1.0 || currentPosition.y > 1.0 || currentPosition.z > 1.0 || currentPosition.x < 0.0 || currentPosition.y < 0.0 || currentPosition.z < 0.0)
-          break;
     }
     gl_FragColor = accum;
-
-    // for test
-    // gl_FragColor = vec4(frontColor.rgb, 1.0);
-    // gl_FragColor = backColor;
 }

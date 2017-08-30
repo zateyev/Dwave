@@ -7,51 +7,35 @@ using glm::vec3;
 namespace dwave {
 
   Dwave::Dwave() {
-    g_winWidth = 1920;//900;
-    g_winHeight = 1135;//800;
+    g_winWidth = 1920; //900;
+    g_winHeight = 1135; //800;
     g_angle = 0;
 
-    g_NumberOfSlices = 512.0;
-    png_width = 4096;
-    png_height = png_width;
-    maxTexturesNumber = 8;
-    g_SlicesOverX = 8.0;
-    g_SlicesOverY = g_SlicesOverX;
-    datasetDir = "../sprites/";
+    // maxTexturesNumber = 8;
     uSetViewMode = 0;
+    uFilterType = 1;
 
     g_stepSize = 256.0;
-    g_MinGrayVal = 103.24;
+    g_MinGrayVal = 103.0;
     g_MaxGrayVal = 1.0;
-    g_OpacityVal = 1.0;
-    g_ColorVal = 1.0;
-    g_AbsorptionModeIndex = 1.0;
-    cyl_rad = 0.45;
+    // g_OpacityVal = 1.0;
+    // g_ColorVal = 1.0;
+    cyl_rad = 0.5;
 
-    tr_width = 256;
-    tr_height = 10;
+    // tr_width = 256;
+    // tr_height = 10;
 
     rotationX = 0.0;
     rotationY = 0.0;
     FoV = 50.0f;
 
-    xx = 0;
-    yy = 0;
     ww = 0;
     hh = 0;
 
     angleX = 0;
     angleY = 0;
 
-    lastQuatX = 0.0f;
-    lastQuatY = 0.0f;
-    lastQuatZ = 0.0f;
-    lastQuatAngle = 0.0f;
-
-    // quatX = 0.0f;
-    // quatY = 0.0f;
-    // quatZ = 0.0f;
-    // quatAngle = 0.0f;
+    lastCam_pos_x = 0.0f;
 
     cam_pos_x = 0.0f;
     cam_pos_y = 0.0f;
@@ -60,6 +44,32 @@ namespace dwave {
     cam_up_x = 0.0f;
     cam_up_y = 1.0f;
     cam_up_z = 0.0f;
+
+    // cam_pos_x = 0.0f;
+    // cam_pos_y = 0.0f;
+    // cam_pos_z = -3.0f;
+    //
+    // cam_up_x = 0.0f;
+    // cam_up_y = -1.0f;
+    // cam_up_z = 0.0f;
+
+    zBottom = 0.0;
+    zTop = 1.0;
+
+    lights[0] = 1.0;
+    lights[1] = 1.0;
+    lights[2] = 1.0;
+    lights[3] = -1.0;
+    lights[4] = -1.0;
+    lights[5] = -1.0;
+    lights[6] = 1.0;
+    lights[7] = 1.0;
+    lights[8] = -1.0;
+
+    value1 = 0.0;
+    value2 = 0.0;
+    value3 = 3;
+    value4 = 0.0;
   }
 
   Dwave::~Dwave() {
@@ -124,16 +134,19 @@ namespace dwave {
 
     // pngTex = new GLuint[maxTexturesNumber];
 
-    // texture.loadImage(datasetDir, pngTex, &png_width, &png_height, maxTexturesNumber);
     Texture texture;
     // texture.initVol3DTex("../final.screw_joint.raw", &pngTex, 419, 492, 462);
-    // texture.initVol3DTex("../breast2.raw", &pngTex, 256, 256, 256);
-    texture.initVol3DTex("../wasp.raw", &pngTex, 256, 256, 449);
-    // texture.initVol3DTex("../wasp_3.raw", &pngTex, 449, 449, 449);
-    // texture.initVol3DTex("../256.raw", &pngTex, 256, 256, 252);
-    // texture.initVol3DTex("../archie.raw", &pngTex, 1536, 1536, 1152);
     // texture.initVol3DTex("../eucrib.raw", &pngTex, 1536, 1536, 1152);
     // texture.initVol3DTex("../gamma.raw", &pngTex, 1008, 1008, 1008);
+    // texture.initVol3DTex("../eucrib512.raw", &pngTex, 512, 512, 512);
+    // texture.initVol3DTex("../archie.raw", &pngTex, 1536, 1536, 1152);
+    // texture.initVol3DTex("../ant1024.raw", &pngTex, 1024, 1024, 1024);
+    // texture.initVol3DTex("../breast2.raw", &pngTex, 256, 256, 256);
+    // texture.initVol3DTex("../breast_hsv.raw", &pngTex, 256, 256, 144);
+    // texture.initVol3DTex("../wasp.raw", &pngTex, 256, 256, 449);
+    // texture.initVol3DTex("../archie256.raw", &pngTex, 256, 256, 256);
+    texture.initVol3DTex("../wasp_3.raw", &pngTex, 449, 449, 449);
+    // texture.initVol3DTex("../bonsai_fiji.raw", &pngTex, 256, 256, 256);
 
     // texture.loadImage2("../cm_BrBG_r.png", &trTex, &tr_width, &tr_height, 1); // cm_Greys_r
     // texture.initTFF1DTex("../tff.dat", &trTex);
@@ -151,15 +164,7 @@ namespace dwave {
     angleY = y;
   }
 
-  // void Dwave::setQuat(float x, float y, float z, float angle) {
-  //   quatX = x;
-  //   quatY = y;
-  //   quatZ = z;
-  //   quatAngle = angle;
-  //   cout << angle << "; x = " << setprecision(18) << x << endl;
-  // }
-
-  void Dwave::setQuat(float px, float py, float pz, float ux, float uy, float uz) {
+  void Dwave::setCameraSettings(float px, float py, float pz, float ux, float uy, float uz) {
     cam_pos_x = px;
     cam_pos_y = py;
     cam_pos_z = pz;
@@ -175,12 +180,22 @@ namespace dwave {
       //  transform the box
       glm::mat4 projection = glm::perspective(glm::radians(FoV), (GLfloat)g_winWidth / g_winHeight, 0.1f, 400.f);
 
-      // glm::vec3 eye = glm::vec3(0.0f, 0.0f, 3.0f);
-      // glm::vec3 objectUp = glm::vec3(0.0f, 1.0f, 0.0f);
-      //
-      // glm::mat4 view = glm::lookAt(eye, // eye
+      // glm::vec3 cam_pos = glm::vec3(cam_pos_x, cam_pos_y, cam_pos_z);
+      // glm::vec3 cam_up = glm::vec3(cam_up_x, cam_up_y, cam_up_z);
+      // glm::vec3 light_1 = glm::vec3(1.0, 1.0, 1.0);
+      // glm::vec3 light_2 = glm::vec3(-1.0, -1.0, -1.0);
+      // glm::vec3 light_3 = glm::vec3(1.0, 1.0, -1.0);
+      // glm::mat4 rotationMat = mat4(1.0f);
+      // rotationMat = glm::rotate(rotationMat, glm::radians(angleX), glm::vec3(0.0, -1.0, 0.0));
+      // rotationMat = glm::rotate(rotationMat, glm::radians(angleY), glm::vec3(-1.0, 0.0, 0.0));
+      // cam_pos = glm::vec3(rotationMat * glm::vec4(cam_pos, 1.0));
+      // cam_up = glm::vec3(rotationMat * glm::vec4(cam_up, 1.0));
+      // light_1 = glm::vec3(rotationMat * glm::vec4(light_1, 1.0));
+      // light_2 = glm::vec3(rotationMat * glm::vec4(light_2, 1.0));
+      // light_3 = glm::vec3(rotationMat * glm::vec4(light_3, 1.0));
+      // glm::mat4 view = glm::lookAt(cam_pos, // eye
       //          glm::vec3(0.0f, 0.0f, 0.0f), // center
-      //          objectUp); // up
+      //          cam_up); // up
 
       glm::mat4 view = glm::lookAt(glm::vec3(cam_pos_x, cam_pos_y, cam_pos_z), // eye
                glm::vec3(0.0f, 0.0f, 0.0f), // center
@@ -188,28 +203,29 @@ namespace dwave {
 
       glm::mat4 model = mat4(1.0f);
 
-      model *= glm::rotate(glm::radians((float)g_angle), glm::vec3(0.0f, 1.0f, 0.0f));
+      model *= glm::rotate(glm::radians((float)g_angle), glm::vec3(0.0f, -1.0f, 0.0f));
 
       model *= glm::rotate(glm::radians(angleX), vec3(0.0f, 1.0f, 0.0f));
       model *= glm::rotate(glm::radians(angleY), vec3(1.0f, 0.0f, 0.0f));
-
-      // glm::quat myQuat;
-      // myQuat = glm::quat(quatAngle, quatX, quatY, quatZ);
-      // glm::mat4 RotationMatrix = glm::toMat4(myQuat);
-      // model *= RotationMatrix;
 
       model *= glm::translate(glm::vec3(-0.5f, -0.5f, -0.5f));
       // notice the multiplication order: reverse order of transform
       glm::mat4 mvp = projection * view * model;
       GLuint mvpIdx = glGetUniformLocation(shader.get_programHandle(), "MVP");
-      if (mvpIdx >= 0)
-      {
-        glUniformMatrix4fv(mvpIdx, 1, GL_FALSE, &mvp[0][0]);
-      }
-      else
-      {
-        cerr << "can't get the MVP" << endl;
-      }
+
+      if (mvpIdx >= 0) glUniformMatrix4fv(mvpIdx, 1, GL_FALSE, &mvp[0][0]);
+      else cerr << "can't get the MVP" << endl;
+
+      // lights[0] = light_1.x;
+      // lights[1] = light_1.y;
+      // lights[2] = light_1.z;
+      // lights[3] = light_2.x;
+      // lights[4] = light_2.y;
+      // lights[5] = light_2.z;
+      // lights[6] = light_3.x;
+      // lights[7] = light_3.y;
+      // lights[8] = light_3.z;
+
       drawBox(cullFace);
   }
 
@@ -313,7 +329,7 @@ namespace dwave {
 
   void Dwave::rcSetUinforms() {
     shader.setUniform("uSteps", g_stepSize);
-    // shader.setUniform("uCylRad", cyl_rad);
+    shader.setUniform("uCylRad", cyl_rad);
     // shader.setUniform("uTransferFunction", GL_TEXTURE_1D, trTex, 0);
     shader.setUniform("uBackCoord", GL_TEXTURE_2D, g_bfTexObj, 1);
 
@@ -338,20 +354,34 @@ namespace dwave {
     // shader.setUniform("uOpacityVal", g_OpacityVal);
     shader.setUniform("uSetViewMode", uSetViewMode);
 
+    GLint location = glGetUniformLocation(shader.get_programHandle(), "LightPosition");
+    if (location >= 0) glUniform3fv(location, 3, lights);
+    else cout << "LightPosition is not bind to the uniform\n";
+
+    shader.setUniform("uFilterType", uFilterType);
+
+    shader.setUniform("zBottom", zBottom);
+    shader.setUniform("zTop", zTop);
+
+    // shader.setUniform("uValue1", value1);
+    // shader.setUniform("uValue2", value2);
+    shader.setUniform("uValue3", value3);
+
     // struct timespec now;
     // clock_gettime(CLOCK_REALTIME, &now);
     // float curtm = now.tv_nsec / 1000000.0;
     // shader.setUniform("time", curtm);
     // cout << curtm << endl;
 
-    // shader.setUniform("uNumberOfSlices", g_NumberOfSlices);
     // shader.setUniform("uColorVal", g_ColorVal);
-    // shader.setUniform("uAbsorptionModeIndex", g_AbsorptionModeIndex);
-    // shader.setUniform("uSlicesOverX", g_SlicesOverX);
-    // shader.setUniform("uSlicesOverY", g_SlicesOverY);
   }
 
   void Dwave::initShader() {
+    // g_bfVertHandle = Shader::initShaderObj("../shader/lebfirstPass.vert", GL_VERTEX_SHADER);
+    // g_bfFragHandle = Shader::initShaderObj("../shader/lebfirstPass.frag", GL_FRAGMENT_SHADER);
+    // g_rcVertHandle = Shader::initShaderObj("../shader/lebsecondPass.vert", GL_VERTEX_SHADER);
+    // g_rcFragHandle = Shader::initShaderObj("../shader/lebsecondPass.frag", GL_FRAGMENT_SHADER);
+
     // vertex shader object for first pass
     g_bfVertHandle = Shader::initShaderObj("../shader/firstPass.vert", GL_VERTEX_SHADER);
     // fragment shader object for first pass
@@ -359,15 +389,15 @@ namespace dwave {
     // vertex shader object for second pass
     g_rcVertHandle = Shader::initShaderObj("../shader/secondPass.vert", GL_VERTEX_SHADER);
     // fragment shader object for second pass
-    // g_rcFragHandle = Shader::initShaderObj("../shader/raycasting.frag", GL_FRAGMENT_SHADER);
-    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassNearestNeighbourHSVFusion.frag", GL_FRAGMENT_SHADER);
-    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassHSVSurface.frag", GL_FRAGMENT_SHADER);
+    g_rcFragHandle = Shader::initShaderObj("../shader/secondPassFinal.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassSoebel.frag", GL_FRAGMENT_SHADER);
-    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassCleanData.frag", GL_FRAGMENT_SHADER);
-    g_rcFragHandle = Shader::initShaderObj("../shader/secondPassMeanFiltering.frag", GL_FRAGMENT_SHADER);
+    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassHSVSurface.frag", GL_FRAGMENT_SHADER);
+    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassNormalFusion.frag", GL_FRAGMENT_SHADER);
+
+    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassNearestNeighbourHSVFusion.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassMedianFiltering.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassCropCylinder.frag", GL_FRAGMENT_SHADER);
-    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassCCMed.frag", GL_FRAGMENT_SHADER);
+    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassMeanFiltering.frag", GL_FRAGMENT_SHADER);
     // create the shader program , use it in an appropriate time
     shader.createShaderPgm();
   }
@@ -375,7 +405,7 @@ namespace dwave {
   void Dwave::updateCamera() {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(xx, xx + ww, yy, yy + hh, -1, 1);
+    glOrtho(0.0f, ww, 0.0f, hh, -1, 1);
     glScalef(1, -1, 1);
     glTranslatef(0, -hh, 0);
   }
@@ -460,7 +490,7 @@ namespace dwave {
   }
 
   void Dwave::rotateDisplay() {
-    // g_angle = (g_angle + 1) % 360;
+    g_angle = (g_angle + 1) % 360;
     glutPostRedisplay();
   }
 
@@ -478,34 +508,40 @@ namespace dwave {
     render(GL_FRONT);
     glUseProgram(0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    // tx = (g_winWidth - tw) / 2;
-    // ty = (g_winHeight - th) / 2;
+
+    tx = (g_winWidth - tw) / 2;
+    ty = (g_winHeight - th) / 2;
+    glViewport(-tx, -ty, g_winWidth, g_winHeight);
+
+    // tx = (g_winWidth - WIDTH) / 2;
+    // ty = (g_winHeight - HEIGHT) / 2;
     // glViewport(-tx, -ty, g_winWidth, g_winHeight);
-    glViewport(-621, -117, g_winWidth, g_winHeight);
+
     Shader::linkShader(shader.get_programHandle(), g_rcVertHandle, g_rcFragHandle);
     glUseProgram(shader.get_programHandle());
     rcSetUinforms();
     render(GL_BACK);
     glUseProgram(0);
 
-    string str = "MinGrayVal: " + to_string(g_MinGrayVal);
+    string str = "MinGrayVal: " + to_string((int)g_MinGrayVal);
     char *cstr = new char[str.length() + 1];
     strcpy(cstr, str.c_str());
     min_gr_label->set_text(cstr);
     delete [] cstr;
 
     // screenshot_png("scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
-    screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
-    glutLeaveMainLoop();
+    // screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+    // glutLeaveMainLoop();
 
-    // if (lastQuatX != quatX || lastQuatY != quatY || lastQuatZ != quatZ || lastQuatAngle != quatAngle) {
-    //   screenshot_png("scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
-    //   lastQuatX = quatX;
-    //   lastQuatY = quatY;
-    //   lastQuatZ = quatZ;
-    //   lastQuatAngle = quatAngle;
-    //   glutLeaveMainLoop();
+    // if (lastCam_pos_x != cam_pos_x) {
+    //   screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+    //   lastCam_pos_x = cam_pos_x;
     // }
+
+    if (value2 != value1) {
+      screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+      value2 = value1;
+    }
 
     // nframes++;
     // if (model_finished) {
@@ -554,15 +590,20 @@ namespace dwave {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowPosition(1900, 1130);
-    glutInitWindowSize(800, 800); // (900, 800)
+    glutInitWindowSize(WIDTH + 100, HEIGHT); // (900, 800)
 
-    main_window = glutCreateWindow("OpenGL VRC");
+    main_window = glutCreateWindow("DWAVE");
     GLenum err = glewInit();
     if (GLEW_OK != err)
     {
       /* Problem: glewInit failed, something is seriously wrong. */
       fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
     }
+
+    // glMatrixMode(GL_PROJECTION);
+    // glLoadIdentity();
+    // glMatrixMode(GL_MODELVIEW);
+    // glLoadIdentity();
 
     GLUI_Master.set_glutDisplayFunc(displayWrapper);
     GLUI_Master.set_glutTimerFunc(10, timerCBWrapper, 10);
@@ -591,53 +632,85 @@ namespace dwave {
 
     fps_val = new GLUI_StaticText(obj_panel, "120 FPS");
 
-    separator = new GLUI_Separator(obj_panel);
-
-    GLUI_StaticText *op_label = new GLUI_StaticText(obj_panel, "Opacity:");
-    sb = new GLUI_Scrollbar(obj_panel, "Opacity", GLUI_SCROLL_HORIZONTAL, &g_OpacityVal);
-    sb->set_float_limits(0, 40);
+    // separator = new GLUI_Separator(obj_panel);
+    // GLUI_StaticText *op_label = new GLUI_StaticText(obj_panel, "Opacity:");
+    // sb = new GLUI_Scrollbar(obj_panel, "Opacity", GLUI_SCROLL_HORIZONTAL, &g_OpacityVal);
+    // sb->set_float_limits(0, 40);
 
     separator = new GLUI_Separator(obj_panel);
 
     min_gr_label = new GLUI_StaticText(obj_panel, "MinGrayVal:");
-    // sb = new GLUI_Scrollbar(obj_panel, "MinGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MinGrayVal);
-    // sb->set_float_limits(0, 1);
-    GLUI_Spinner* spinner = new GLUI_Spinner(obj_panel, "MinGrayVal:", &g_MinGrayVal);
-    spinner->set_float_limits(0, 256.0);
-    spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    // GLUI_Spinner* spinner = new GLUI_Spinner(obj_panel, "MinGrayVal:", &g_MinGrayVal);
+    // spinner->set_float_limits(0, 256.0);
+    // spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    //
+    // separator = new GLUI_Separator(obj_panel);
+    sb = new GLUI_Scrollbar(obj_panel, "MinGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MinGrayVal);
+    sb->set_float_limits(0, 256.0);
 
     separator = new GLUI_Separator(obj_panel);
-
     GLUI_StaticText *max_gr_label = new GLUI_StaticText(obj_panel, "MaxGrayVal:");
     sb = new GLUI_Scrollbar(obj_panel, "MaxGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MaxGrayVal);
     sb->set_float_limits(0, 1);
 
+    // separator = new GLUI_Separator(obj_panel);
+    // GLUI_StaticText *color_val_label = new GLUI_StaticText(obj_panel, "ColorVal:");
+    // sb = new GLUI_Scrollbar(obj_panel, "ColorVal", GLUI_SCROLL_HORIZONTAL, &g_ColorVal);
+    // sb->set_float_limits(0, 1.0);
+
     separator = new GLUI_Separator(obj_panel);
-
-    GLUI_StaticText *color_val_label = new GLUI_StaticText(obj_panel, "ColorVal:");
-    sb = new GLUI_Scrollbar(obj_panel, "ColorVal", GLUI_SCROLL_HORIZONTAL, &g_ColorVal);
-    sb->set_float_limits(0, 1.0);
-
-    separator = new GLUI_Separator(obj_panel);
-
-    // GLUI_StaticText *step_size_label = new GLUI_StaticText(obj_panel, "StepSize:");
-    // GLUI_Spinner *spinner = new GLUI_Spinner(obj_panel, "StepSize:", &g_stepSize);
-    spinner = new GLUI_Spinner(obj_panel, "StepSize:", &g_stepSize);
-    spinner->set_float_limits(0, 2024.0);
+    GLUI_Spinner* spinner = new GLUI_Spinner(obj_panel, "StepSize:", &g_stepSize);
+    spinner->set_float_limits(0, 2048.0);
     spinner->set_alignment(GLUI_ALIGN_RIGHT);
-    sb = new GLUI_Scrollbar(obj_panel, "StepSize", GLUI_SCROLL_HORIZONTAL, &g_stepSize);
-    sb->set_float_limits(0, 2024.0);
+    // sb = new GLUI_Scrollbar(obj_panel, "StepSize", GLUI_SCROLL_HORIZONTAL, &g_stepSize);
+    // sb->set_float_limits(0, 2024.0);
 
-    separator = new GLUI_Separator(obj_panel);
-    spinner = new GLUI_Spinner(obj_panel, "Cylinder rad:", &cyl_rad);
-    spinner->set_float_limits(0, 0.7);
-    spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    // separator = new GLUI_Separator(obj_panel);
+    // spinner = new GLUI_Spinner(obj_panel, "Cylinder rad:", &cyl_rad);
+    // spinner->set_float_limits(0, 0.7);
+    // spinner->set_alignment(GLUI_ALIGN_RIGHT);
 
     /**** Add listbox ****/
     new GLUI_StaticText( glui, "" );
     GLUI_Listbox *list = new GLUI_Listbox( glui, "View mode:", &uSetViewMode );
     list->add_item(0, "Blinn-Phong shading");
     list->add_item(1, "Cook-Torrance");
+
+    new GLUI_StaticText( glui, "" );
+    GLUI_Listbox *filters = new GLUI_Listbox( glui, "Filter type:", &uFilterType );
+    filters->add_item(0, "None");
+    filters->add_item(1, "Mean Filtering");
+    filters->add_item(2, "Median Filtering");
+
+    separator = new GLUI_Separator(obj_panel);
+    spinner = new GLUI_Spinner(obj_panel, "Take a screenshot:", &value1);
+    spinner->set_float_limits(0.1, 0.9);
+    spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    //
+    // separator = new GLUI_Separator(obj_panel);
+    // spinner = new GLUI_Spinner(obj_panel, "Reflectance:", &value2);
+    // spinner->set_float_limits(1.0, 10.0);
+    // spinner->set_alignment(GLUI_ALIGN_RIGHT);
+
+    separator = new GLUI_Separator(obj_panel);
+    GLUI_StaticText *c_rad_label = new GLUI_StaticText(obj_panel, "Cylinder rad:");
+    sb = new GLUI_Scrollbar(obj_panel, "Cylinder rad", GLUI_SCROLL_HORIZONTAL, &cyl_rad);
+    sb->set_float_limits(0, 0.5);
+
+    separator = new GLUI_Separator(obj_panel);
+    GLUI_StaticText *z_bottom = new GLUI_StaticText(obj_panel, "Z bottom:");
+    sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zBottom);
+    sb->set_float_limits(0, 1.0);
+
+    separator = new GLUI_Separator(obj_panel);
+    GLUI_StaticText *z_top = new GLUI_StaticText(obj_panel, "Z top:");
+    sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zTop);
+    sb->set_float_limits(0, 1.0);
+
+    separator = new GLUI_Separator(obj_panel);
+    spinner = new GLUI_Spinner(obj_panel, "Lights number:", &value3);
+    spinner->set_int_limits(0, 8);
+    spinner->set_alignment(GLUI_ALIGN_RIGHT);
 
     init();
 
@@ -653,10 +726,6 @@ namespace dwave {
     glutMainLoop();
 
     // glutMainLoopEvent();
-    // while(1)
-    // {
-    //   glutMainLoopEvent();
-    // }
   }
 
   void Dwave::stopDwave() {
@@ -684,12 +753,8 @@ extern "C" {
       dwave->startDwave(0, NULL);
     }
 
-    // void Dwave_set_quat(dwave::Dwave* dwave, float x, float y, float z, float angle) {
-    //   dwave->setQuat(x, y, z, angle);
-    // }
-
-    void Dwave_set_quat(dwave::Dwave* dwave, float px, float py, float pz, float ux, float uy, float uz) {
-      dwave->setQuat(px, py, pz, ux, uy, uz);
+    void Dwave_set_cam_settings(dwave::Dwave* dwave, float px, float py, float pz, float ux, float uy, float uz) {
+      dwave->setCameraSettings(px, py, pz, ux, uy, uz);
     }
 
     void Dwave_stop(dwave::Dwave* dwave) {
