@@ -66,6 +66,9 @@ namespace dwave {
       GLuint g_bfFragHandle;
       // GLuint *pngTex;
       GLuint pngTex;
+      GLuint normalx;
+      GLuint normaly;
+      GLuint normalz;
       GLuint trTex;
 
       // int maxTexturesNumber;

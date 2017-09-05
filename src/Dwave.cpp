@@ -139,13 +139,17 @@ namespace dwave {
     // texture.initVol3DTex("../eucrib.raw", &pngTex, 1536, 1536, 1152);
     // texture.initVol3DTex("../gamma.raw", &pngTex, 1008, 1008, 1008);
     // texture.initVol3DTex("../eucrib512.raw", &pngTex, 512, 512, 512);
+    texture.initVol3DTex("../eucrib256.raw", &pngTex, 256, 256, 256);
+    texture.initVol3DTex("../normalx.raw", &normalx, 256, 256, 256);
+    texture.initVol3DTex("../normaly.raw", &normaly, 256, 256, 256);
+    texture.initVol3DTex("../normalz.raw", &normalz, 256, 256, 256);
     // texture.initVol3DTex("../archie.raw", &pngTex, 1536, 1536, 1152);
     // texture.initVol3DTex("../ant1024.raw", &pngTex, 1024, 1024, 1024);
     // texture.initVol3DTex("../breast2.raw", &pngTex, 256, 256, 256);
     // texture.initVol3DTex("../breast_hsv.raw", &pngTex, 256, 256, 144);
     // texture.initVol3DTex("../wasp.raw", &pngTex, 256, 256, 449);
     // texture.initVol3DTex("../archie256.raw", &pngTex, 256, 256, 256);
-    texture.initVol3DTex("../wasp_3.raw", &pngTex, 449, 449, 449);
+    // texture.initVol3DTex("../wasp_3.raw", &pngTex, 449, 449, 449);
     // texture.initVol3DTex("../bonsai_fiji.raw", &pngTex, 256, 256, 256);
 
     // texture.loadImage2("../cm_BrBG_r.png", &trTex, &tr_width, &tr_height, 1); // cm_Greys_r
@@ -175,7 +179,8 @@ namespace dwave {
   }
 
   void Dwave::render(GLenum cullFace) {
-      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+      // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       //  transform the box
       glm::mat4 projection = glm::perspective(glm::radians(FoV), (GLfloat)g_winWidth / g_winHeight, 0.1f, 400.f);
@@ -349,6 +354,9 @@ namespace dwave {
     // }
 
     shader.setUniform("uSliceMaps", GL_TEXTURE_3D, pngTex, 2);
+    shader.setUniform("normalx", GL_TEXTURE_3D, normalx, 3);
+    shader.setUniform("normaly", GL_TEXTURE_3D, normaly, 4);
+    shader.setUniform("normalz", GL_TEXTURE_3D, normalz, 5);
     shader.setUniform("uMinGrayVal", (float)(g_MinGrayVal / 256.0));
     shader.setUniform("uMaxGrayVal", g_MaxGrayVal);
     // shader.setUniform("uOpacityVal", g_OpacityVal);
@@ -389,6 +397,7 @@ namespace dwave {
     // vertex shader object for second pass
     g_rcVertHandle = Shader::initShaderObj("../shader/secondPass.vert", GL_VERTEX_SHADER);
     // fragment shader object for second pass
+    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassDVR.frag", GL_FRAGMENT_SHADER);
     g_rcFragHandle = Shader::initShaderObj("../shader/secondPassFinal.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassSoebel.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassHSVSurface.frag", GL_FRAGMENT_SHADER);

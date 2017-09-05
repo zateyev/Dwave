@@ -4,6 +4,9 @@ varying vec4 frontColor;
 varying vec4 pos;
 uniform sampler2D uBackCoord;
 uniform sampler3D uSliceMaps;
+uniform sampler3D normalx;
+uniform sampler3D normaly;
+uniform sampler3D normalz;
 uniform int uSetViewMode;
 uniform int uFilterType;
 uniform float uMinGrayVal;
@@ -18,13 +21,13 @@ uniform vec3 LightPosition[3];
 // uniform float uValue2;
 uniform int uValue3;
 
-float xw = 449.0;
-float yw = 449.0;
-float zw = 449.0;
-
-// float xw = 256.0;
-// float yw = 256.0;
+// float xw = 449.0;
+// float yw = 449.0;
 // float zw = 449.0;
+
+float xw = 256.0;
+float yw = 256.0;
+float zw = 256.0;
 
 // float xw = 512.0;
 // float yw = 512.0;
@@ -40,93 +43,44 @@ float zw = 449.0;
 
 // Compute the Normal around the current voxel
 vec3 getNormal(vec3 at) {
+    // float x0 = at.x - 5.0/xw;
+    // float x1 = at.x + 5.0/xw;
+    //
+    // float y0 = at.x - 5.0/yw;
+    // float y1 = at.x + 5.0/yw;
+    //
+    // float z0 = at.x - 5.0/zw;
+    // float z1 = at.x + 5.0/zw;
+    // return vec3(x0 - x1, y0 - y1, z0 - z1);
+
     vec3 texpos1;
 
-    float w0 = (at.z - (1.0/zw)) - floor(at.z);
-    float w1 = at.z - floor(at.z);
-    float w2 = (at.z + (1.0/zw)) - floor(at.z);
+    // float w0 = (at.z - (1.0/zw)) - floor(at.z);
+    // float w1 = at.z - floor(at.z);
+    // float w2 = (at.z + (1.0/zw)) - floor(at.z);
+    float w0 = at.z - (1.0/zw);
+    float w1 = at.z;
+    float w2 = at.z + (1.0/zw);
 
     float fx, fy, fz;
 
-    float L0, L1, L2, L3, L4, L5, L6, L7, L8;
-    float H0, H1, H2, H3, H4, H5, H6, H7, H8;
+    float L[9];
+    float H[9];
+
+    // float xdir[3][9] = (float[](-1.0, -3.0, -1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 1.0),
+    //                     float[](-1.0, -3.0, -1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 1.0),
+    //                     float[](-1.0, -3.0, -1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 1.0));
 
     texpos1.z = at.z - 1.0/zw;
+    for (int i = 2, k = 0; i > -1; --i) {
+      for (int j = 0; j < 3; j++) {
+        texpos1.x = at.x + (j - 1)/xw;
+        texpos1.y = at.y + (i - 1)/yw;
+        L[k] = texture(uSliceMaps, texpos1).x;
+        H[k++] = texture(uSliceMaps, vec3(texpos1.x, texpos1.y, at.z + 1.0/zw)).x;
+      }
+    }
 
-    texpos1.x = at.x - 1.0/xw;
-    texpos1.y = at.y + 1.0/yw;
-    L0 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 0.0/xw;
-    texpos1.y = at.y + 1.0/yw;
-    L1 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 1.0/xw;
-    texpos1.y = at.y + 1.0/yw;
-    L2 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x - 1.0/xw;
-    texpos1.y = at.y + 0.0/yw;
-    L3 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 0.0/xw;
-    texpos1.y = at.y + 0.0/yw;
-    L4 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 1.0/xw;
-    texpos1.y = at.y + 0.0/yw;
-    L5 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x - 1.0/xw;
-    texpos1.y = at.y - 1.0/yw;
-    L6 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 0.0/xw;
-    texpos1.y = at.y - 1.0/yw;
-    L7 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 1.0/xw;
-    texpos1.y = at.y - 1.0/yw;
-    L8 = texture(uSliceMaps, texpos1).x;
-
-
-    texpos1.z = at.z + 1.0/zw;
-
-    texpos1.x = at.x - 1.0/xw;
-    texpos1.y = at.y + 1.0/yw;
-    H0 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 0.0/xw;
-    texpos1.y = at.y + 1.0/yw;
-    H1 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 1.0/xw;
-    texpos1.y = at.y + 1.0/yw;
-    H2 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x - 1.0/xw;
-    texpos1.y = at.y + 0.0/yw;
-    H3 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 0.0/xw;
-    texpos1.y = at.y + 0.0/yw;
-    H4 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 1.0/xw;
-    texpos1.y = at.y + 0.0/yw;
-    H5 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x - 1.0/xw;
-    texpos1.y = at.y - 1.0/yw;
-    H6 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 0.0/xw;
-    texpos1.y = at.y - 1.0/yw;
-    H7 = texture(uSliceMaps, texpos1).x;
-
-    texpos1.x = at.x + 1.0/xw;
-    texpos1.y = at.y - 1.0/yw;
-    H8 = texture(uSliceMaps, texpos1).x;
     // we need to get interpolation of 2 x points
     // x direction
     // -1 -3 -1   0  0  0   1  3  1
@@ -141,114 +95,114 @@ vec3 getNormal(vec3 at) {
     // -3  0  3   -6  0  6   -3  0  3
     // -1  0  1   -3  0  3   -1  0  1
 
-    fx =  ((w0 * (H0 - L0)) + L0) * -1.0;
-    fx += ((w1 * (H0 - L0)) + L0) * -3.0;
-    fx += ((w2 * (H0 - L0)) + L0) * -1.0;
+    fx =  ((w0 * (H[0] - L[0])) + L[0]) * -1.0;
+    fx += ((w1 * (H[0] - L[0])) + L[0]) * -3.0;
+    fx += ((w2 * (H[0] - L[0])) + L[0]) * -1.0;
 
-    fx += ((w0 * (H3 - L3)) + L3) * -3.0;
-    fx += ((w1 * (H3 - L3)) + L3) * -6.0;
-    fx += ((w2 * (H3 - L3)) + L3) * -3.0;
+    fx += ((w0 * (H[3] - L[3])) + L[3]) * -3.0;
+    fx += ((w1 * (H[3] - L[3])) + L[3]) * -6.0;
+    fx += ((w2 * (H[3] - L[3])) + L[3]) * -3.0;
 
-    fx += ((w0 * (H6 - L6)) + L6) * -1.0;
-    fx += ((w1 * (H6 - L6)) + L6) * -3.0;
-    fx += ((w2 * (H6 - L6)) + L6) * -1.0;
+    fx += ((w0 * (H[6] - L[6])) + L[6]) * -1.0;
+    fx += ((w1 * (H[6] - L[6])) + L[6]) * -3.0;
+    fx += ((w2 * (H[6] - L[6])) + L[6]) * -1.0;
 
-    fx += ((w0 * (H1 - L1)) + L1) * 0.0;
-    fx += ((w1 * (H1 - L1)) + L1) * 0.0;
-    fx += ((w2 * (H1 - L1)) + L1) * 0.0;
+    fx += ((w0 * (H[1] - L[1])) + L[1]) * 0.0;
+    fx += ((w1 * (H[1] - L[1])) + L[1]) * 0.0;
+    fx += ((w2 * (H[1] - L[1])) + L[1]) * 0.0;
 
-    fx += ((w0 * (H4 - L4)) + L4) * 0.0;
-    fx += ((w1 * (H4 - L4)) + L4) * 0.0;
-    fx += ((w2 * (H4 - L4)) + L4) * 0.0;
+    fx += ((w0 * (H[4] - L[4])) + L[4]) * 0.0;
+    fx += ((w1 * (H[4] - L[4])) + L[4]) * 0.0;
+    fx += ((w2 * (H[4] - L[4])) + L[4]) * 0.0;
 
-    fx += ((w0 * (H7 - L7)) + L7) * 0.0;
-    fx += ((w1 * (H7 - L7)) + L7) * 0.0;
-    fx += ((w2 * (H7 - L7)) + L7) * 0.0;
+    fx += ((w0 * (H[7] - L[7])) + L[7]) * 0.0;
+    fx += ((w1 * (H[7] - L[7])) + L[7]) * 0.0;
+    fx += ((w2 * (H[7] - L[7])) + L[7]) * 0.0;
 
-    fx += ((w0 * (H2 - L2)) + L2) * 1.0;
-    fx += ((w1 * (H2 - L2)) + L2) * 3.0;
-    fx += ((w2 * (H2 - L2)) + L2) * 1.0;
+    fx += ((w0 * (H[2] - L[2])) + L[2]) * 1.0;
+    fx += ((w1 * (H[2] - L[2])) + L[2]) * 3.0;
+    fx += ((w2 * (H[2] - L[2])) + L[2]) * 1.0;
 
-    fx += ((w0 * (H5 - L5)) + L5) * 3.0;
-    fx += ((w1 * (H5 - L5)) + L5) * 6.0;
-    fx += ((w2 * (H5 - L5)) + L5) * 3.0;
+    fx += ((w0 * (H[5] - L[5])) + L[5]) * 3.0;
+    fx += ((w1 * (H[5] - L[5])) + L[5]) * 6.0;
+    fx += ((w2 * (H[5] - L[5])) + L[5]) * 3.0;
 
-    fx += ((w0 * (H8 - L8)) + L8) * 1.0;
-    fx += ((w1 * (H8 - L8)) + L8) * 3.0;
-    fx += ((w2 * (H8 - L8)) + L8) * 1.0;
+    fx += ((w0 * (H[8] - L[8])) + L[8]) * 1.0;
+    fx += ((w1 * (H[8] - L[8])) + L[8]) * 3.0;
+    fx += ((w2 * (H[8] - L[8])) + L[8]) * 1.0;
 
-    fy =  ((w0 * (H0 - L0)) + L0) * 1.0;
-    fy += ((w1 * (H0 - L0)) + L0) * 3.0;
-    fy += ((w2 * (H0 - L0)) + L0) * 1.0;
+    fy =  ((w0 * (H[0] - L[0])) + L[0]) * 1.0;
+    fy += ((w1 * (H[0] - L[0])) + L[0]) * 3.0;
+    fy += ((w2 * (H[0] - L[0])) + L[0]) * 1.0;
 
-    fy += ((w0 * (H3 - L3)) + L3) * 0.0;
-    fy += ((w1 * (H3 - L3)) + L3) * 0.0;
-    fy += ((w2 * (H3 - L3)) + L3) * 0.0;
+    fy += ((w0 * (H[3] - L[3])) + L[3]) * 0.0;
+    fy += ((w1 * (H[3] - L[3])) + L[3]) * 0.0;
+    fy += ((w2 * (H[3] - L[3])) + L[3]) * 0.0;
 
-    fy += ((w0 * (H6 - L6)) + L6) * -1.0;
-    fy += ((w1 * (H6 - L6)) + L6) * -3.0;
-    fy += ((w2 * (H6 - L6)) + L6) * -1.0;
+    fy += ((w0 * (H[6] - L[6])) + L[6]) * -1.0;
+    fy += ((w1 * (H[6] - L[6])) + L[6]) * -3.0;
+    fy += ((w2 * (H[6] - L[6])) + L[6]) * -1.0;
 
-    fy += ((w0 * (H1 - L1)) + L1) * 3.0;
-    fy += ((w1 * (H1 - L1)) + L1) * 6.0;
-    fy += ((w2 * (H1 - L1)) + L1) * 3.0;
+    fy += ((w0 * (H[1] - L[1])) + L[1]) * 3.0;
+    fy += ((w1 * (H[1] - L[1])) + L[1]) * 6.0;
+    fy += ((w2 * (H[1] - L[1])) + L[1]) * 3.0;
 
-    fy += ((w0 * (H4 - L4)) + L4) * 0.0;
-    fy += ((w1 * (H4 - L4)) + L4) * 0.0;
-    fy += ((w2 * (H4 - L4)) + L4) * 0.0;
+    fy += ((w0 * (H[4] - L[4])) + L[4]) * 0.0;
+    fy += ((w1 * (H[4] - L[4])) + L[4]) * 0.0;
+    fy += ((w2 * (H[4] - L[4])) + L[4]) * 0.0;
 
-    fy += ((w0 * (H7 - L7)) + L7) * -3.0;
-    fy += ((w1 * (H7 - L7)) + L7) * -6.0;
-    fy += ((w2 * (H7 - L7)) + L7) * -3.0;
+    fy += ((w0 * (H[7] - L[7])) + L[7]) * -3.0;
+    fy += ((w1 * (H[7] - L[7])) + L[7]) * -6.0;
+    fy += ((w2 * (H[7] - L[7])) + L[7]) * -3.0;
 
-    fy += ((w0 * (H2 - L2)) + L2) * 1.0;
-    fy += ((w1 * (H2 - L2)) + L2) * 3.0;
-    fy += ((w2 * (H2 - L2)) + L2) * 1.0;
+    fy += ((w0 * (H[2] - L[2])) + L[2]) * 1.0;
+    fy += ((w1 * (H[2] - L[2])) + L[2]) * 3.0;
+    fy += ((w2 * (H[2] - L[2])) + L[2]) * 1.0;
 
-    fy += ((w0 * (H5 - L5)) + L5) * 0.0;
-    fy += ((w1 * (H5 - L5)) + L5) * 0.0;
-    fy += ((w2 * (H5 - L5)) + L5) * 0.0;
+    fy += ((w0 * (H[5] - L[5])) + L[5]) * 0.0;
+    fy += ((w1 * (H[5] - L[5])) + L[5]) * 0.0;
+    fy += ((w2 * (H[5] - L[5])) + L[5]) * 0.0;
 
-    fy += ((w0 * (H8 - L8)) + L8) * -1.0;
-    fy += ((w1 * (H8 - L8)) + L8) * -3.0;
-    fy += ((w2 * (H8 - L8)) + L8) * -1.0;
+    fy += ((w0 * (H[8] - L[8])) + L[8]) * -1.0;
+    fy += ((w1 * (H[8] - L[8])) + L[8]) * -3.0;
+    fy += ((w2 * (H[8] - L[8])) + L[8]) * -1.0;
 
 
-    fz =  ((w0 * (H0 - L0)) + L0) * -1.0;
-    fz += ((w1 * (H0 - L0)) + L0) * 0.0;
-    fz += ((w2 * (H0 - L0)) + L0) * 1.0;
+    fz =  ((w0 * (H[0] - L[0])) + L[0]) * -1.0;
+    fz += ((w1 * (H[0] - L[0])) + L[0]) * 0.0;
+    fz += ((w2 * (H[0] - L[0])) + L[0]) * 1.0;
 
-    fz += ((w0 * (H3 - L3)) + L3) * -3.0;
-    fz += ((w1 * (H3 - L3)) + L3) * 0.0;
-    fz += ((w2 * (H3 - L3)) + L3) * 3.0;
+    fz += ((w0 * (H[3] - L[3])) + L[3]) * -3.0;
+    fz += ((w1 * (H[3] - L[3])) + L[3]) * 0.0;
+    fz += ((w2 * (H[3] - L[3])) + L[3]) * 3.0;
 
-    fz += ((w0 * (H6 - L6)) + L6) * -1.0;
-    fz += ((w1 * (H6 - L6)) + L6) * 0.0;
-    fz += ((w2 * (H6 - L6)) + L6) * 1.0;
+    fz += ((w0 * (H[6] - L[6])) + L[6]) * -1.0;
+    fz += ((w1 * (H[6] - L[6])) + L[6]) * 0.0;
+    fz += ((w2 * (H[6] - L[6])) + L[6]) * 1.0;
 
-    fz += ((w0 * (H1 - L1)) + L1) * -3.0;
-    fz += ((w1 * (H1 - L1)) + L1) * 0.0;
-    fz += ((w2 * (H1 - L1)) + L1) * 3.0;
+    fz += ((w0 * (H[1] - L[1])) + L[1]) * -3.0;
+    fz += ((w1 * (H[1] - L[1])) + L[1]) * 0.0;
+    fz += ((w2 * (H[1] - L[1])) + L[1]) * 3.0;
 
-    fz += ((w0 * (H4 - L4)) + L4) * -6.0;
-    fz += ((w1 * (H4 - L4)) + L4) * 0.0;
-    fz += ((w2 * (H4 - L4)) + L4) * 6.0;
+    fz += ((w0 * (H[4] - L[4])) + L[4]) * -6.0;
+    fz += ((w1 * (H[4] - L[4])) + L[4]) * 0.0;
+    fz += ((w2 * (H[4] - L[4])) + L[4]) * 6.0;
 
-    fz += ((w0 * (H7 - L7)) + L7) * -3.0;
-    fz += ((w1 * (H7 - L7)) + L7) * 0.0;
-    fz += ((w2 * (H7 - L7)) + L7) * 3.0;
+    fz += ((w0 * (H[7] - L[7])) + L[7]) * -3.0;
+    fz += ((w1 * (H[7] - L[7])) + L[7]) * 0.0;
+    fz += ((w2 * (H[7] - L[7])) + L[7]) * 3.0;
 
-    fz += ((w0 * (H2 - L2)) + L2) * -1.0;
-    fz += ((w1 * (H2 - L2)) + L2) * 0.0;
-    fz += ((w2 * (H2 - L2)) + L2) * 1.0;
+    fz += ((w0 * (H[2] - L[2])) + L[2]) * -1.0;
+    fz += ((w1 * (H[2] - L[2])) + L[2]) * 0.0;
+    fz += ((w2 * (H[2] - L[2])) + L[2]) * 1.0;
 
-    fz += ((w0 * (H5 - L5)) + L5) * -3.0;
-    fz += ((w1 * (H5 - L5)) + L5) * 0.0;
-    fz += ((w2 * (H5 - L5)) + L5) * 3.0;
+    fz += ((w0 * (H[5] - L[5])) + L[5]) * -3.0;
+    fz += ((w1 * (H[5] - L[5])) + L[5]) * 0.0;
+    fz += ((w2 * (H[5] - L[5])) + L[5]) * 3.0;
 
-    fz += ((w0 * (H8 - L8)) + L8) * -1.0;
-    fz += ((w1 * (H8 - L8)) + L8) * 0.0;
-    fz += ((w2 * (H8 - L8)) + L8) * 1.0;
+    fz += ((w0 * (H[8] - L[8])) + L[8]) * -1.0;
+    fz += ((w1 * (H[8] - L[8])) + L[8]) * 0.0;
+    fz += ((w2 * (H[8] - L[8])) + L[8]) * 1.0;
     vec3 n = vec3( fx/27.0 , fy/27.0 , fz/27.0 );
     return n;
 }
@@ -358,8 +312,8 @@ void main(void)
     vec3 dir = backColor.rgb - frontColor.rgb;
     vec4 currentPosition = frontColor;
     vec3 Step = dir/uSteps;
-    vec4 accum = vec4(0, 0, 0, 0);
-    vec4 sample = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 accum = vec4(0.0);
+    vec4 sample = vec4(0.0);
     // vec3 lightPos[8];
     // lightPos[0] = vec3(1, 1, 1);
     // lightPos[1] = vec3(-1, -1, -1);
@@ -471,7 +425,12 @@ void main(void)
         if (gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
           // normalize vectors after interpolation
           vec3 V = normalize(pos - currentPosition.xyz);
-          vec3 N = normalize(getNormal(currentPosition.xyz));
+          float tx = texture(normalx, currentPosition.xyz).x * 255.0 - 127.0;
+          float ty = texture(normaly, currentPosition.xyz).x * 255.0 - 127.0;
+          float tz = texture(normalz, currentPosition.xyz).x * 255.0 - 127.0;
+          // vec3 N = normalize(vec3(tx, ty, tz));
+          vec3 N = (normalize(getNormal(currentPosition.xyz)) + 1.0) / 2.0;
+          // vec3 N = normalize(vec3(1.0));
 
           // set important material values for cookTorranceSpecular
           float roughnessValue = 0.9; // 0 : smooth, 1: rough
@@ -485,7 +444,11 @@ void main(void)
               vec3 Iamb = ambientLighting();
               vec3 Idif = diffuseLighting(N, L);
               vec3 Ispe = specularLighting(N, L, V);
-              sample.rgb += (Iamb + Idif + Ispe);
+              sample.rgb += N;
+              // sample.rgb += (Iamb + Idif + Ispe);
+              // sample.rgb += Iamb;
+              // sample.rgb += Idif;
+              // sample.rgb += Ispe;
               // if (uValue3 == 1) {
               //   sample.rgb += Iamb;
               // }
