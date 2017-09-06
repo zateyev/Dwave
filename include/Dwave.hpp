@@ -36,8 +36,8 @@ namespace dwave {
       static GLuint fbo;
       static GLuint rbo_color;
       static GLuint rbo_depth;
-      static const unsigned int HEIGHT = 800;
-      static const unsigned int WIDTH = 800;
+      static const unsigned int HEIGHT = 600;
+      static const unsigned int WIDTH = 600;
       static int offscreen;
       static unsigned int max_nframes;
       static unsigned int nframes;
@@ -66,9 +66,6 @@ namespace dwave {
       GLuint g_bfFragHandle;
       // GLuint *pngTex;
       GLuint pngTex;
-      GLuint normalx;
-      GLuint normaly;
-      GLuint normalz;
       GLuint trTex;
 
       // int maxTexturesNumber;
@@ -78,10 +75,6 @@ namespace dwave {
       float g_stepSize;
       float g_MinGrayVal;
       float g_MaxGrayVal;
-      // float g_OpacityVal;
-      // float g_ColorVal;
-      float cyl_rad;
-
 
       // int tr_width;
       // int tr_height;
@@ -110,12 +103,7 @@ namespace dwave {
       float zBottom;
       float zTop;
 
-      float lights[9];
-
-      float value1;
-      float value2;
-      int value3;
-      float value4;
+      const char* dataset_path;
 
       int main_window;
 
@@ -162,6 +150,8 @@ namespace dwave {
       void setAngles(float x, float y);
 
       void setCameraSettings(float px, float py, float pz, float ux, float uy, float uz);
+
+      void setDatasetPath(const char* path);
 
       void startDwave(int argc, char** argv);
 
