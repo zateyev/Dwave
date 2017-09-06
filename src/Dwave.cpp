@@ -139,10 +139,11 @@ namespace dwave {
     // texture.initVol3DTex("../eucrib.raw", &pngTex, 1536, 1536, 1152);
     // texture.initVol3DTex("../gamma.raw", &pngTex, 1008, 1008, 1008);
     // texture.initVol3DTex("../eucrib512.raw", &pngTex, 512, 512, 512);
-    texture.initVol3DTex("../eucrib256.raw", &pngTex, 256, 256, 256);
-    texture.initVol3DTex("../normalx.raw", &normalx, 256, 256, 256);
-    texture.initVol3DTex("../normaly.raw", &normaly, 256, 256, 256);
-    texture.initVol3DTex("../normalz.raw", &normalz, 256, 256, 256);
+    // texture.initVol3DTex("../eucrib256.raw", &pngTex, 256, 256, 256);
+    texture.initVol3DTex("../blArchie.raw", &pngTex, 320, 320, 1151);
+    // texture.initVol3DTex("../normalx.raw", &normalx, 256, 256, 256);
+    // texture.initVol3DTex("../normaly.raw", &normaly, 256, 256, 256);
+    // texture.initVol3DTex("../normalz.raw", &normalz, 256, 256, 256);
     // texture.initVol3DTex("../archie.raw", &pngTex, 1536, 1536, 1152);
     // texture.initVol3DTex("../ant1024.raw", &pngTex, 1024, 1024, 1024);
     // texture.initVol3DTex("../breast2.raw", &pngTex, 256, 256, 256);
@@ -397,8 +398,8 @@ namespace dwave {
     // vertex shader object for second pass
     g_rcVertHandle = Shader::initShaderObj("../shader/secondPass.vert", GL_VERTEX_SHADER);
     // fragment shader object for second pass
-    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassDVR.frag", GL_FRAGMENT_SHADER);
-    g_rcFragHandle = Shader::initShaderObj("../shader/secondPassFinal.frag", GL_FRAGMENT_SHADER);
+    g_rcFragHandle = Shader::initShaderObj("../shader/secondPassDVR.frag", GL_FRAGMENT_SHADER);
+    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassFinal.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassSoebel.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassHSVSurface.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassNormalFusion.frag", GL_FRAGMENT_SHADER);
@@ -507,7 +508,13 @@ namespace dwave {
     int tx, ty, tw, th;
     GLUI_Master.get_viewport_area(&tx, &ty, &tw, &th);
 
-    glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_DEPTH_TEST);
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
     // render to texture
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, g_frameBuffer);
     glViewport(0, 0, g_winWidth, g_winHeight);
