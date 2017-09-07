@@ -15,9 +15,9 @@ namespace dwave {
     uSetViewMode = 0;
     uFilterType = 1;
 
-    g_stepSize = 256.0;
+    g_stepSize = 512.0;
     g_MinGrayVal = 103.0;
-    g_MaxGrayVal = 1.0;
+    g_MaxGrayVal = 255.0;
     // g_OpacityVal = 1.0;
     // g_ColorVal = 1.0;
     cyl_rad = 0.5;
@@ -27,7 +27,8 @@ namespace dwave {
 
     rotationX = 0.0;
     rotationY = 0.0;
-    FoV = 50.0f;
+    FoV = 48.482f;
+    // FoV = 45.0f;
 
     ww = 0;
     hh = 0;
@@ -35,7 +36,7 @@ namespace dwave {
     angleX = 0;
     angleY = 0;
 
-    lastCam_pos_x = 0.0f;
+    lastCam_pos = 3.0f;
 
     cam_pos_x = 0.0f;
     cam_pos_y = 0.0f;
@@ -140,7 +141,7 @@ namespace dwave {
     // texture.initVol3DTex("../gamma.raw", &pngTex, 1008, 1008, 1008);
     // texture.initVol3DTex("../eucrib512.raw", &pngTex, 512, 512, 512);
     // texture.initVol3DTex("../eucrib256.raw", &pngTex, 256, 256, 256);
-    texture.initVol3DTex("../blArchie.raw", &pngTex, 320, 320, 1151);
+    // texture.initVol3DTex("../blArchie.raw", &pngTex, 320, 320, 1151);
     // texture.initVol3DTex("../normalx.raw", &normalx, 256, 256, 256);
     // texture.initVol3DTex("../normaly.raw", &normaly, 256, 256, 256);
     // texture.initVol3DTex("../normalz.raw", &normalz, 256, 256, 256);
@@ -148,7 +149,7 @@ namespace dwave {
     // texture.initVol3DTex("../ant1024.raw", &pngTex, 1024, 1024, 1024);
     // texture.initVol3DTex("../breast2.raw", &pngTex, 256, 256, 256);
     // texture.initVol3DTex("../breast_hsv.raw", &pngTex, 256, 256, 144);
-    // texture.initVol3DTex("../wasp.raw", &pngTex, 256, 256, 449);
+    texture.initVol3DTex("../wasp.raw", &pngTex, 256, 256, 449);
     // texture.initVol3DTex("../archie256.raw", &pngTex, 256, 256, 256);
     // texture.initVol3DTex("../wasp_3.raw", &pngTex, 449, 449, 449);
     // texture.initVol3DTex("../bonsai_fiji.raw", &pngTex, 256, 256, 256);
@@ -335,7 +336,7 @@ namespace dwave {
 
   void Dwave::rcSetUinforms() {
     shader.setUniform("uSteps", g_stepSize);
-    shader.setUniform("uCylRad", cyl_rad);
+    // shader.setUniform("uCylRad", cyl_rad);
     // shader.setUniform("uTransferFunction", GL_TEXTURE_1D, trTex, 0);
     shader.setUniform("uBackCoord", GL_TEXTURE_2D, g_bfTexObj, 1);
 
@@ -355,11 +356,11 @@ namespace dwave {
     // }
 
     shader.setUniform("uSliceMaps", GL_TEXTURE_3D, pngTex, 2);
-    shader.setUniform("normalx", GL_TEXTURE_3D, normalx, 3);
-    shader.setUniform("normaly", GL_TEXTURE_3D, normaly, 4);
-    shader.setUniform("normalz", GL_TEXTURE_3D, normalz, 5);
-    shader.setUniform("uMinGrayVal", (float)(g_MinGrayVal / 256.0));
-    shader.setUniform("uMaxGrayVal", g_MaxGrayVal);
+    // shader.setUniform("normalx", GL_TEXTURE_3D, normalx, 3);
+    // shader.setUniform("normaly", GL_TEXTURE_3D, normaly, 4);
+    // shader.setUniform("normalz", GL_TEXTURE_3D, normalz, 5);
+    shader.setUniform("uMinGrayVal", (float)(g_MinGrayVal / 255.0));
+    shader.setUniform("uMaxGrayVal", (float)(g_MaxGrayVal / 255.0));
     // shader.setUniform("uOpacityVal", g_OpacityVal);
     shader.setUniform("uSetViewMode", uSetViewMode);
 
@@ -398,15 +399,15 @@ namespace dwave {
     // vertex shader object for second pass
     g_rcVertHandle = Shader::initShaderObj("../shader/secondPass.vert", GL_VERTEX_SHADER);
     // fragment shader object for second pass
-    g_rcFragHandle = Shader::initShaderObj("../shader/secondPassDVR.frag", GL_FRAGMENT_SHADER);
-    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassFinal.frag", GL_FRAGMENT_SHADER);
+    g_rcFragHandle = Shader::initShaderObj("../shader/secondPassFinal.frag", GL_FRAGMENT_SHADER);
+    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassCropCylinder.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassSoebel.frag", GL_FRAGMENT_SHADER);
+    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassDVR.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassHSVSurface.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassNormalFusion.frag", GL_FRAGMENT_SHADER);
 
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassNearestNeighbourHSVFusion.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassMedianFiltering.frag", GL_FRAGMENT_SHADER);
-    // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassCropCylinder.frag", GL_FRAGMENT_SHADER);
     // g_rcFragHandle = Shader::initShaderObj("../shader/secondPassMeanFiltering.frag", GL_FRAGMENT_SHADER);
     // create the shader program , use it in an appropriate time
     shader.createShaderPgm();
@@ -508,12 +509,12 @@ namespace dwave {
     int tx, ty, tw, th;
     GLUI_Master.get_viewport_area(&tx, &ty, &tw, &th);
 
-    // glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    // glDisable(GL_DEPTH_TEST);
+    // glEnable(GL_BLEND);
+    // glBlendEquation(GL_FUNC_ADD);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
     // render to texture
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, g_frameBuffer);
@@ -525,13 +526,13 @@ namespace dwave {
     glUseProgram(0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    tx = (g_winWidth - tw) / 2;
-    ty = (g_winHeight - th) / 2;
-    glViewport(-tx, -ty, g_winWidth, g_winHeight);
-
-    // tx = (g_winWidth - WIDTH) / 2;
-    // ty = (g_winHeight - HEIGHT) / 2;
+    // tx = (g_winWidth - tw) / 2;
+    // ty = (g_winHeight - th) / 2;
     // glViewport(-tx, -ty, g_winWidth, g_winHeight);
+
+    tx = (g_winWidth - WIDTH) / 2;
+    ty = (g_winHeight - HEIGHT) / 2;
+    glViewport(-tx, -ty, g_winWidth, g_winHeight);
 
     Shader::linkShader(shader.get_programHandle(), g_rcVertHandle, g_rcFragHandle);
     glUseProgram(shader.get_programHandle());
@@ -546,18 +547,19 @@ namespace dwave {
     delete [] cstr;
 
     // screenshot_png("scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
-    // screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
-    // glutLeaveMainLoop();
 
-    // if (lastCam_pos_x != cam_pos_x) {
+    screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+    glutLeaveMainLoop();
+
+    // if (lastCam_pos != cam_pos_x + cam_pos_y + cam_pos_z) {
     //   screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
-    //   lastCam_pos_x = cam_pos_x;
+    //   lastCam_pos = cam_pos_x + cam_pos_y + cam_pos_z;
     // }
 
-    if (value2 != value1) {
-      screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
-      value2 = value1;
-    }
+    // if (value2 != value1) {
+    //   screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+    //   value2 = value1;
+    // }
 
     // nframes++;
     // if (model_finished) {
@@ -662,12 +664,12 @@ namespace dwave {
     //
     // separator = new GLUI_Separator(obj_panel);
     sb = new GLUI_Scrollbar(obj_panel, "MinGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MinGrayVal);
-    sb->set_float_limits(0, 256.0);
+    sb->set_float_limits(0, 255.0);
 
     separator = new GLUI_Separator(obj_panel);
     GLUI_StaticText *max_gr_label = new GLUI_StaticText(obj_panel, "MaxGrayVal:");
     sb = new GLUI_Scrollbar(obj_panel, "MaxGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MaxGrayVal);
-    sb->set_float_limits(0, 1);
+    sb->set_float_limits(0, 255.0);
 
     // separator = new GLUI_Separator(obj_panel);
     // GLUI_StaticText *color_val_label = new GLUI_StaticText(obj_panel, "ColorVal:");

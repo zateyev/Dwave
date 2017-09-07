@@ -11,9 +11,9 @@ uniform float uMaxGrayVal;
 uniform float uSteps;
 uniform float uCylRad;
 
-// float xw = 449.0;
-// float yw = 449.0;
-// float zw = 449.0;
+float xw = 256.0;
+float yw = 256.0;
+float zw = 449.0;
 
 // float xw = 256.0;
 // float yw = 256.0;
@@ -23,9 +23,9 @@ uniform float uCylRad;
 // float yw = 1536.0;
 // float zw = 1152.0;
 
-float xw = 512.0;
-float yw = 512.0;
-float zw = 512.0;
+// float xw = 512.0;
+// float yw = 512.0;
+// float zw = 512.0;
 
 // float xw = 419.0;
 // float yw = 492.0;
@@ -379,53 +379,53 @@ void main(void)
       distanceFromCenter = sqrt(xsqu + ysqu);
       if (distanceFromCenter < uCylRad && currentPosition.z > 0.1 && currentPosition.z < 0.9) {
         float gray_val = texture(uSliceMaps, currentPosition.xyz);
-        // if (uSetViewMode == 0 && gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
-        //
-        //   float sum_gray_val = 0.0;
-        //
-        //   int mask_size = 3;
-        //   vec3 offset;
-        //   vec3 curDotPos;
-        //
-        //   for(int i = 0; i < mask_size; ++i) {
-        //     for(int j = 0; j < mask_size; ++j) {
-        //       for(int k = 0; k < mask_size; ++k) {
-        //         offset = vec3((i - (int)mask_size / 2) / xw,
-        //         (j - (int)mask_size / 2) / yw,
-        //         (k - (int)mask_size / 2) / zw);
-        //
-        //         curDotPos = currentPosition.xyz + offset;
-        //         sum_gray_val += texture(uSliceMaps, curDotPos).x;
-        //       }
-        //     }
-        //   }
-        //
-        //   gray_val = sum_gray_val / pow(mask_size, 3);
-        //
-        //   // vec3 dirFromCP[14];
-        //   // dirFromCP[0] = vec3(1.0 / xw, 0.0 / yw, 0.0 / zw);
-        //   // dirFromCP[1] = vec3(0.0 / xw, 1.0 / yw, 0.0 / zw);
-        //   // dirFromCP[2] = vec3(0.0 / xw, 0.0 / yw, 1.0 / zw);
-        //   // dirFromCP[3] = vec3(-1.0 / xw, 0.0 / yw, 0.0 / zw);
-        //   // dirFromCP[4] = vec3(0.0 / xw, -1.0 / yw, 0.0 / zw);
-        //   // dirFromCP[5] = vec3(0.0 / xw, 0.0 / yw, -1.0 / zw);
-        //   //
-        //   // dirFromCP[6] = vec3(-1.0 / xw, 1.0 / yw, 1.0 / zw);
-        //   // dirFromCP[7] = vec3(1.0 / xw, 1.0 / yw, 1.0 / zw);
-        //   // dirFromCP[8] = vec3(1.0 / xw, 1.0 / yw, -1.0 / zw);
-        //   // dirFromCP[9] = vec3(-1.0 / xw, 1.0 / yw, -1.0 / zw);
-        //   // dirFromCP[10] = vec3(-1.0 / xw, -1.0 / yw, 1.0 / zw);
-        //   // dirFromCP[11] = vec3(1.0 / xw, -1.0 / yw, 1.0 / zw);
-        //   // dirFromCP[12] = vec3(1.0 / xw, -1.0 / yw, -1.0 / zw);
-        //   // dirFromCP[13] = vec3(-1.0 / xw, -1.0 / yw, -1.0 / zw);
-        //   // for(int i = 0; i < 14; ++i) {
-        //   //   offset = dirFromCP[i];
-        //   //   curDotPos = currentPosition.xyz + offset;
-        //   //   sum_gray_val += texture(uSliceMaps, curDotPos).x;
-        //   // }
-        //   // gray_val = (sum_gray_val / 14); // * 1.002;
-        //
-        // }
+        if (uSetViewMode == 0 && gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
+
+          float sum_gray_val = 0.0;
+
+          int mask_size = 3;
+          vec3 offset;
+          vec3 curDotPos;
+
+          for(int i = 0; i < mask_size; ++i) {
+            for(int j = 0; j < mask_size; ++j) {
+              for(int k = 0; k < mask_size; ++k) {
+                offset = vec3((i - (int)mask_size / 2) / xw,
+                (j - (int)mask_size / 2) / yw,
+                (k - (int)mask_size / 2) / zw);
+
+                curDotPos = currentPosition.xyz + offset;
+                sum_gray_val += texture(uSliceMaps, curDotPos).x;
+              }
+            }
+          }
+
+          gray_val = sum_gray_val / pow(mask_size, 3);
+
+          // vec3 dirFromCP[14];
+          // dirFromCP[0] = vec3(1.0 / xw, 0.0 / yw, 0.0 / zw);
+          // dirFromCP[1] = vec3(0.0 / xw, 1.0 / yw, 0.0 / zw);
+          // dirFromCP[2] = vec3(0.0 / xw, 0.0 / yw, 1.0 / zw);
+          // dirFromCP[3] = vec3(-1.0 / xw, 0.0 / yw, 0.0 / zw);
+          // dirFromCP[4] = vec3(0.0 / xw, -1.0 / yw, 0.0 / zw);
+          // dirFromCP[5] = vec3(0.0 / xw, 0.0 / yw, -1.0 / zw);
+          //
+          // dirFromCP[6] = vec3(-1.0 / xw, 1.0 / yw, 1.0 / zw);
+          // dirFromCP[7] = vec3(1.0 / xw, 1.0 / yw, 1.0 / zw);
+          // dirFromCP[8] = vec3(1.0 / xw, 1.0 / yw, -1.0 / zw);
+          // dirFromCP[9] = vec3(-1.0 / xw, 1.0 / yw, -1.0 / zw);
+          // dirFromCP[10] = vec3(-1.0 / xw, -1.0 / yw, 1.0 / zw);
+          // dirFromCP[11] = vec3(1.0 / xw, -1.0 / yw, 1.0 / zw);
+          // dirFromCP[12] = vec3(1.0 / xw, -1.0 / yw, -1.0 / zw);
+          // dirFromCP[13] = vec3(-1.0 / xw, -1.0 / yw, -1.0 / zw);
+          // for(int i = 0; i < 14; ++i) {
+          //   offset = dirFromCP[i];
+          //   curDotPos = currentPosition.xyz + offset;
+          //   sum_gray_val += texture(uSliceMaps, curDotPos).x;
+          // }
+          // gray_val = (sum_gray_val / 14); // * 1.002;
+
+        }
         if(gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
           // normalize vectors after interpolation
           vec3 V = normalize(pos - currentPosition.xyz);

@@ -97,7 +97,7 @@ namespace dwave {
       float angleX;
       float angleY;
 
-      float lastCam_pos_x;
+      float lastCam_pos;
 
       float cam_pos_x;
       float cam_pos_y;

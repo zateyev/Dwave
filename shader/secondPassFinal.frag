@@ -4,15 +4,15 @@ varying vec4 frontColor;
 varying vec4 pos;
 uniform sampler2D uBackCoord;
 uniform sampler3D uSliceMaps;
-uniform sampler3D normalx;
-uniform sampler3D normaly;
-uniform sampler3D normalz;
+// uniform sampler3D normalx;
+// uniform sampler3D normaly;
+// uniform sampler3D normalz;
 uniform int uSetViewMode;
 uniform int uFilterType;
 uniform float uMinGrayVal;
 uniform float uMaxGrayVal;
 uniform float uSteps;
-uniform float uCylRad;
+// uniform float uCylRad;
 uniform float zBottom;
 uniform float zTop;
 uniform vec3 LightPosition[3];
@@ -27,7 +27,7 @@ uniform int uValue3;
 
 float xw = 256.0;
 float yw = 256.0;
-float zw = 256.0;
+float zw = 449.0;
 
 // float xw = 512.0;
 // float yw = 512.0;
@@ -206,6 +206,7 @@ vec3 getNormal(vec3 at) {
     vec3 n = vec3( fx/27.0 , fy/27.0 , fz/27.0 );
     return n;
 }
+
 // returns intensity of reflected ambient lighting
 const vec3 lightColor = vec3(1.0, 0.88, 0.74);
 const vec3 u_intensity = vec3(0.1, 0.1, 0.1);
@@ -325,15 +326,15 @@ void main(void)
     // lightPos[6] = vec3(1, -1, -1);
     // lightPos[7] = vec3(1, -1, 1);
 
-    float xsqu;
-    float ysqu;
-    float distanceFromCenter;
+    // float xsqu;
+    // float ysqu;
+    // float distanceFromCenter;
 
     for(int i = 0; i < uSteps; i++) {
-      xsqu = (0.5 - currentPosition.x) * (0.5 - currentPosition.x);
-      ysqu = (0.5 - currentPosition.y) * (0.5 - currentPosition.y);
-      distanceFromCenter = sqrt(xsqu + ysqu);
-      if (distanceFromCenter < uCylRad &&
+      // xsqu = (0.5 - currentPosition.x) * (0.5 - currentPosition.x);
+      // ysqu = (0.5 - currentPosition.y) * (0.5 - currentPosition.y);
+      // distanceFromCenter = sqrt(xsqu + ysqu);
+      if (//distanceFromCenter < uCylRad &&
           currentPosition.z > zBottom && currentPosition.z < zTop) {
         float gray_val = texture(uSliceMaps, currentPosition.xyz);
         if (uFilterType != 0 && gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
@@ -425,11 +426,13 @@ void main(void)
         if (gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
           // normalize vectors after interpolation
           vec3 V = normalize(pos - currentPosition.xyz);
-          float tx = texture(normalx, currentPosition.xyz).x * 255.0 - 127.0;
-          float ty = texture(normaly, currentPosition.xyz).x * 255.0 - 127.0;
-          float tz = texture(normalz, currentPosition.xyz).x * 255.0 - 127.0;
+
+          // float tx = texture(normalx, currentPosition.xyz).x * 255.0 - 127.0;
+          // float ty = texture(normaly, currentPosition.xyz).x * 255.0 - 127.0;
+          // float tz = texture(normalz, currentPosition.xyz).x * 255.0 - 127.0;
           // vec3 N = normalize(vec3(tx, ty, tz));
-          vec3 N = (normalize(getNormal(currentPosition.xyz)) + 1.0) / 2.0;
+
+          vec3 N = normalize(getNormal(currentPosition.xyz));
           // vec3 N = normalize(vec3(1.0));
 
           // set important material values for cookTorranceSpecular
@@ -444,8 +447,8 @@ void main(void)
               vec3 Iamb = ambientLighting();
               vec3 Idif = diffuseLighting(N, L);
               vec3 Ispe = specularLighting(N, L, V);
-              sample.rgb += N;
-              // sample.rgb += (Iamb + Idif + Ispe);
+              // sample.rgb += N;
+              sample.rgb += (Iamb + Idif + Ispe);
               // sample.rgb += Iamb;
               // sample.rgb += Idif;
               // sample.rgb += Ispe;

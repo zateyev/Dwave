@@ -16,16 +16,9 @@ uniform float s;
 // Compute the Normal around the current voxel
 vec3 getNormal(vec3 at)
 {
-    // float xw = 419.0;
-    // float yw = 492.0;
-    // float zw = 462.0;
 
-    // float xw = 256.0;
-    // float yw = 256.0;
-    // float zw = 256.0;
-
-    float xw = 449.0;
-    float yw = 449.0;
+    float xw = 256.0;
+    float yw = 256.0;
     float zw = 449.0;
 
     vec3 texpos1;
