@@ -36,8 +36,8 @@ namespace dwave {
       static GLuint fbo;
       static GLuint rbo_color;
       static GLuint rbo_depth;
-      static const unsigned int HEIGHT = 800;
-      static const unsigned int WIDTH = 800;
+      // static const unsigned int HEIGHT = 732;
+      // static const unsigned int WIDTH = 732;
       static int offscreen;
       static unsigned int max_nframes;
       static unsigned int nframes;
@@ -93,6 +93,9 @@ namespace dwave {
 
       int ww;
       int hh;
+
+      int scr_width;
+      int scr_height;
 
       float angleX;
       float angleY;
@@ -162,6 +165,8 @@ namespace dwave {
       void setAngles(float x, float y);
 
       void setCameraSettings(float px, float py, float pz, float ux, float uy, float uz);
+
+      void setSceneSize(int width, int height);
 
       void startDwave(int argc, char** argv);
 

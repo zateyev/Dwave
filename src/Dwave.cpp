@@ -9,6 +9,10 @@ namespace dwave {
   Dwave::Dwave() {
     g_winWidth = 1920; //900;
     g_winHeight = 1135; //800;
+
+    scr_width = 1135;
+    scr_height = 1135;
+
     g_angle = 0;
 
     // maxTexturesNumber = 8;
@@ -27,8 +31,8 @@ namespace dwave {
 
     rotationX = 0.0;
     rotationY = 0.0;
-    FoV = 48.482f;
-    // FoV = 45.0f;
+    // FoV = 48.482f;
+    FoV = 45.0f;
 
     ww = 0;
     hh = 0;
@@ -180,12 +184,26 @@ namespace dwave {
     cam_up_z = uz;
   }
 
+  void Dwave::setSceneSize(int width, int height) {
+    g_winWidth = width;
+    g_winHeight = height;
+
+    if (height < width) {
+      scr_width = height;
+      scr_height = height;
+    } else {
+      scr_width = width;
+      scr_height = width;
+    }
+  }
+
   void Dwave::render(GLenum cullFace) {
       // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       //  transform the box
       glm::mat4 projection = glm::perspective(glm::radians(FoV), (GLfloat)g_winWidth / g_winHeight, 0.1f, 400.f);
+      // glm::mat4 projection = glm::perspective(glm::radians(FoV), (GLfloat)g_winWidth / g_winHeight, 0.01f, 11.f);
 
       // glm::vec3 cam_pos = glm::vec3(cam_pos_x, cam_pos_y, cam_pos_z);
       // glm::vec3 cam_up = glm::vec3(cam_up_x, cam_up_y, cam_up_z);
@@ -530,9 +548,11 @@ namespace dwave {
     // ty = (g_winHeight - th) / 2;
     // glViewport(-tx, -ty, g_winWidth, g_winHeight);
 
-    tx = (g_winWidth - WIDTH) / 2;
-    ty = (g_winHeight - HEIGHT) / 2;
+    tx = (g_winWidth - scr_width) / 2;
+    ty = (g_winHeight - scr_height) / 2;
     glViewport(-tx, -ty, g_winWidth, g_winHeight);
+
+    // glViewport(0, 0, g_winWidth, g_winHeight);
 
     Shader::linkShader(shader.get_programHandle(), g_rcVertHandle, g_rcFragHandle);
     glUseProgram(shader.get_programHandle());
@@ -548,7 +568,7 @@ namespace dwave {
 
     // screenshot_png("scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
 
-    screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+    screenshot_png("static/img/scrshot.png", scr_width, scr_height, &pixels, &png_bytes, &png_rows);
     glutLeaveMainLoop();
 
     // if (lastCam_pos != cam_pos_x + cam_pos_y + cam_pos_z) {
@@ -608,7 +628,8 @@ namespace dwave {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
     glutInitWindowPosition(1900, 1130);
-    glutInitWindowSize(WIDTH + 100, HEIGHT); // (900, 800)
+    glutInitWindowSize(scr_width + 100, scr_height); // (900, 800)
+    // glutInitWindowSize(1920, 1045); // (900, 800)
 
     main_window = glutCreateWindow("DWAVE");
     GLenum err = glewInit();
@@ -773,6 +794,10 @@ extern "C" {
 
     void Dwave_set_cam_settings(dwave::Dwave* dwave, float px, float py, float pz, float ux, float uy, float uz) {
       dwave->setCameraSettings(px, py, pz, ux, uy, uz);
+    }
+
+    void Dwave_set_scene_size(dwave::Dwave* dwave, int width, int height) {
+      dwave->setSceneSize(width, height);
     }
 
     void Dwave_stop(dwave::Dwave* dwave) {
