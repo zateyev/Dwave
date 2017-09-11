@@ -87,7 +87,11 @@ namespace dwave {
     GLubyte **pixels, png_byte **png_bytes, png_byte ***png_rows) {
       size_t i, nvals;
       const size_t format_nchannels = 4;
-      FILE *f = fopen(filename, "wb");
+      FILE *f; // = fopen(filename, "wb");
+      if (!(f = fopen(filename, "wb"))) {
+          printf("Error: failed creating file %s. Error at line %d in file %s\n", filename, __LINE__, __FILE__);
+          exit(EXIT_FAILURE);
+      }
       nvals = format_nchannels * width * height;
       *pixels = (GLubyte*)realloc(*pixels, nvals * sizeof(GLubyte));
       *png_bytes = (png_byte*)realloc(*png_bytes, nvals * sizeof(png_byte));
@@ -198,7 +202,7 @@ namespace dwave {
   }
 
   void Dwave::render(GLenum cullFace) {
-      // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+      glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       //  transform the box
