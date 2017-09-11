@@ -20,7 +20,6 @@
 #include "shader.hpp"
 
 // #pragma comment(lib, "/usr/lib/lib/libglui.so")
-#include "glui.h"
 
 #include <iomanip> // setprecision
 #include <sstream>
@@ -108,10 +107,6 @@ namespace dwave {
       int main_window;
 
       /** Pointers to the windows and some of the controls we'll create **/
-      GLUI *glui;
-
-      GLUI_StaticText *fps_val;
-      GLUI_StaticText *min_gr_label;
 
       static void screenshot_png(const char *filename, unsigned int width, unsigned int height,
         GLubyte **pixels, png_byte **png_bytes, png_byte ***png_rows);

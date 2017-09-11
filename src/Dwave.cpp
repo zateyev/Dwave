@@ -304,11 +304,6 @@ namespace dwave {
         << "\nLatency: " << 1000.0/double(framesPerSecond);
       string str = "FPS: " + stream.str();
 
-      char* cstr = new char[str.length() + 1];
-      strcpy(cstr, str.c_str());
-      fps_val->set_text(cstr);
-      delete [] cstr;
-
       // lastTime++;
       lastTime = currentTime;
       // if(SHOW_FPS == 1) fprintf(stderr, "\nCurrent Frames Per Second: %d\n\n", (int)framesPerSecond);
@@ -377,7 +372,6 @@ namespace dwave {
 
   void Dwave::display() {
     int tx, ty, tw, th;
-    GLUI_Master.get_viewport_area(&tx, &ty, &tw, &th);
 
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -473,81 +467,15 @@ namespace dwave {
     // glMatrixMode(GL_MODELVIEW);
     // glLoadIdentity();
 
-    GLUI_Master.set_glutDisplayFunc(displayWrapper);
-    GLUI_Master.set_glutTimerFunc(10, timerCBWrapper, 10);
-    GLUI_Master.set_glutReshapeFunc(reshapeWrapper);
+    glutDisplayFunc(displayWrapper);
+    glutTimerFunc(10, timerCBWrapper, 10);
+    glutReshapeFunc(reshapeWrapper);
     glutKeyboardFunc(keyboardWrapper);
     glutMotionFunc(motionWrapper);
-    GLUI_Master.set_glutMouseFunc(mouseMoveWrapper);
+    glutMouseFunc(mouseMoveWrapper);
     // GLUI_Master.set_glutIdleFunc(rotateDisplayWrapper);
 
-    /****************************************/
-    /*         Here's the GLUI code         */
-    /****************************************/
-
-    printf( "GLUI version: %3.2f\n", GLUI_Master.get_version() );
-
-    /*** Create the side subwindow ***/
-    glui = GLUI_Master.create_glui_subwindow(main_window, GLUI_SUBWINDOW_RIGHT);
-
-    // obj_panel = new GLUI_Rollout(glui, "Properties", false);
-    GLUI_Panel *obj_panel = new GLUI_Panel(glui, "");
-
-    /***** Control for object params *****/
-
-    GLUI_Scrollbar *sb;
-    GLUI_Separator *separator;
-
-    fps_val = new GLUI_StaticText(obj_panel, "120 FPS");
-
-    separator = new GLUI_Separator(obj_panel);
-
-    min_gr_label = new GLUI_StaticText(obj_panel, "MinGrayVal:");
-    // GLUI_Spinner* spinner = new GLUI_Spinner(obj_panel, "MinGrayVal:", &g_MinGrayVal);
-    // spinner->set_float_limits(0, 256.0);
-    // spinner->set_alignment(GLUI_ALIGN_RIGHT);
-    //
-    // separator = new GLUI_Separator(obj_panel);
-    sb = new GLUI_Scrollbar(obj_panel, "MinGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MinGrayVal);
-    sb->set_float_limits(0, 256.0);
-
-    separator = new GLUI_Separator(obj_panel);
-    GLUI_StaticText *max_gr_label = new GLUI_StaticText(obj_panel, "MaxGrayVal:");
-    sb = new GLUI_Scrollbar(obj_panel, "MaxGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MaxGrayVal);
-    sb->set_float_limits(0, 1);
-
-    separator = new GLUI_Separator(obj_panel);
-    GLUI_Spinner* spinner = new GLUI_Spinner(obj_panel, "StepSize:", &g_stepSize);
-    spinner->set_float_limits(0, 2048.0);
-    spinner->set_alignment(GLUI_ALIGN_RIGHT);
-    // sb = new GLUI_Scrollbar(obj_panel, "StepSize", GLUI_SCROLL_HORIZONTAL, &g_stepSize);
-    // sb->set_float_limits(0, 2024.0);
-
-    // separator = new GLUI_Separator(obj_panel);
-    // spinner->set_float_limits(0, 0.7);
-    // spinner->set_alignment(GLUI_ALIGN_RIGHT);
-
-    /**** Add listbox ****/
-
-    new GLUI_StaticText( glui, "" );
-    GLUI_Listbox *filters = new GLUI_Listbox( glui, "Filter type:", &uFilterType );
-    filters->add_item(0, "None");
-    filters->add_item(1, "Mean Filtering");
-    filters->add_item(2, "Median Filtering");
-
-    separator = new GLUI_Separator(obj_panel);
-    GLUI_StaticText *z_bottom = new GLUI_StaticText(obj_panel, "Z bottom:");
-    sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zBottom);
-    sb->set_float_limits(0, 1.0);
-
-    separator = new GLUI_Separator(obj_panel);
-    GLUI_StaticText *z_top = new GLUI_StaticText(obj_panel, "Z top:");
-    sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zTop);
-    sb->set_float_limits(0, 1.0);
-
     init();
-
-    glui->set_main_gfx_window(main_window);
 
     // delete obj_panel;
     // delete separator;
