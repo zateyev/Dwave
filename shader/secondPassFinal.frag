@@ -13,8 +13,12 @@ uniform float uMinGrayVal;
 uniform float uMaxGrayVal;
 uniform float uSteps;
 // uniform float uCylRad;
-uniform float zBottom;
-uniform float zTop;
+uniform float xmin;
+uniform float xmax;
+uniform float ymin;
+uniform float ymax;
+uniform float zmin;
+uniform float zmax;
 uniform vec3 LightPosition[3];
 
 // uniform float uValue1;
@@ -25,13 +29,13 @@ uniform int uValue3;
 // float yw = 449.0;
 // float zw = 449.0;
 
-float xw = 256.0;
-float yw = 256.0;
-float zw = 449.0;
+// float xw = 256.0;
+// float yw = 256.0;
+// float zw = 449.0;
 
-// float xw = 512.0;
-// float yw = 512.0;
-// float zw = 512.0;
+float xw = 512.0;
+float yw = 512.0;
+float zw = 512.0;
 
 // float xw = 1536.0;
 // float yw = 1536.0;
@@ -335,7 +339,9 @@ void main(void)
       // ysqu = (0.5 - currentPosition.y) * (0.5 - currentPosition.y);
       // distanceFromCenter = sqrt(xsqu + ysqu);
       if (//distanceFromCenter < uCylRad &&
-          currentPosition.z > zBottom && currentPosition.z < zTop) {
+          currentPosition.x > xmin && currentPosition.x < xmax &&
+          currentPosition.y > ymin && currentPosition.y < ymax &&
+          currentPosition.z > zmin && currentPosition.z < zmax) {
         float gray_val = texture(uSliceMaps, currentPosition.xyz);
         if (uFilterType != 0 && gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
           int mask_size = 3;

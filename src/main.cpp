@@ -6,7 +6,7 @@
 int main(int argc, char** argv) {
   // dwave::Dwave dwave;
   dwave::Dwave* dwave = new dwave::Dwave();
-  dwave->setSceneSize(1440, 732);
+  dwave->setSceneSize(900, 800);
   dwave->startDwave(0, NULL);
   // std::thread first(&dwave::Dwave::startDwave, dwave, 0, argv);
   // for (int i = 3; i > 0; --i) {

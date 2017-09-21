@@ -58,8 +58,12 @@ namespace dwave {
     // cam_up_y = -1.0f;
     // cam_up_z = 0.0f;
 
-    zBottom = 0.0;
-    zTop = 1.0;
+    xmin = 0.0;
+    xmax = 1.0;
+    ymin = 0.0;
+    ymax = 1.0;
+    zmin = 0.0;
+    zmax = 1.0;
 
     lights[0] = 1.0;
     lights[1] = 1.0;
@@ -147,7 +151,7 @@ namespace dwave {
     // texture.initVol3DTex("../final.screw_joint.raw", &pngTex, 419, 492, 462);
     // texture.initVol3DTex("../eucrib.raw", &pngTex, 1536, 1536, 1152);
     // texture.initVol3DTex("../gamma.raw", &pngTex, 1008, 1008, 1008);
-    // texture.initVol3DTex("../eucrib512.raw", &pngTex, 512, 512, 512);
+    texture.initVol3DTex("../eucrib512.raw", &pngTex, 512, 512, 512);
     // texture.initVol3DTex("../eucrib256.raw", &pngTex, 256, 256, 256);
     // texture.initVol3DTex("../blArchie.raw", &pngTex, 320, 320, 1151);
     // texture.initVol3DTex("../normalx.raw", &normalx, 256, 256, 256);
@@ -157,7 +161,7 @@ namespace dwave {
     // texture.initVol3DTex("../ant1024.raw", &pngTex, 1024, 1024, 1024);
     // texture.initVol3DTex("../breast2.raw", &pngTex, 256, 256, 256);
     // texture.initVol3DTex("../breast_hsv.raw", &pngTex, 256, 256, 144);
-    texture.initVol3DTex("../wasp.raw", &pngTex, 256, 256, 449);
+    // texture.initVol3DTex("../wasp.raw", &pngTex, 256, 256, 449);
     // texture.initVol3DTex("../archie256.raw", &pngTex, 256, 256, 256);
     // texture.initVol3DTex("../wasp_3.raw", &pngTex, 449, 449, 449);
     // texture.initVol3DTex("../bonsai_fiji.raw", &pngTex, 256, 256, 256);
@@ -192,21 +196,33 @@ namespace dwave {
     g_winWidth = width;
     g_winHeight = height;
 
-    if (height < width) {
-      scr_width = height;
-      scr_height = height;
-    } else {
-      scr_width = width;
-      scr_height = width;
-    }
+    scr_width = width;
+    scr_height = height;
+
+    // if (height < width) {
+    //   scr_width = height;
+    //   scr_height = height;
+    // } else {
+    //   scr_width = width;
+    //   scr_height = width;
+    // }
+  }
+
+  void Dwave::setGeometry(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax) {
+    this->xmin = xmin;
+    this->xmax = xmax;
+    this->ymin = ymin;
+    this->ymax = ymax;
+    this->zmin = zmin;
+    this->zmax = zmax;
   }
 
   void Dwave::render(GLenum cullFace) {
-      glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+      // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       // glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       //  transform the box
-      glm::mat4 projection = glm::perspective(glm::radians(FoV), (GLfloat)g_winWidth / g_winHeight, 0.1f, 400.f);
+      glm::mat4 projection = glm::perspective(glm::radians(FoV), (GLfloat)g_winWidth / g_winHeight, 0.01f, 11.f);
       // glm::mat4 projection = glm::perspective(glm::radians(FoV), (GLfloat)g_winWidth / g_winHeight, 0.01f, 11.f);
 
       // glm::vec3 cam_pos = glm::vec3(cam_pos_x, cam_pos_y, cam_pos_z);
@@ -392,8 +408,14 @@ namespace dwave {
 
     shader.setUniform("uFilterType", uFilterType);
 
-    shader.setUniform("zBottom", zBottom);
-    shader.setUniform("zTop", zTop);
+    shader.setUniform("xmin", xmin);
+    shader.setUniform("xmax", xmax);
+
+    shader.setUniform("ymin", ymin);
+    shader.setUniform("ymax", ymax);
+
+    shader.setUniform("zmin", zmin);
+    shader.setUniform("zmax", zmax);
 
     // shader.setUniform("uValue1", value1);
     // shader.setUniform("uValue2", value2);
@@ -742,12 +764,12 @@ namespace dwave {
 
     separator = new GLUI_Separator(obj_panel);
     GLUI_StaticText *z_bottom = new GLUI_StaticText(obj_panel, "Z bottom:");
-    sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zBottom);
+    sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zmin);
     sb->set_float_limits(0, 1.0);
 
     separator = new GLUI_Separator(obj_panel);
     GLUI_StaticText *z_top = new GLUI_StaticText(obj_panel, "Z top:");
-    sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zTop);
+    sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zmax);
     sb->set_float_limits(0, 1.0);
 
     separator = new GLUI_Separator(obj_panel);
@@ -802,6 +824,10 @@ extern "C" {
 
     void Dwave_set_scene_size(dwave::Dwave* dwave, int width, int height) {
       dwave->setSceneSize(width, height);
+    }
+
+    void Dwave_set_geometry(dwave::Dwave* dwave, float xmin, float xmax, float ymin, float ymax, float zmin, float zmax) {
+      dwave->setGeometry(xmin, xmax, ymin, ymax, zmin, zmax);
     }
 
     void Dwave_stop(dwave::Dwave* dwave) {

@@ -110,8 +110,12 @@ namespace dwave {
       float cam_up_y;
       float cam_up_z;
 
-      float zBottom;
-      float zTop;
+      float xmin;
+      float xmax;
+      float ymin;
+      float ymax;
+      float zmin;
+      float zmax;
 
       float lights[9];
 
@@ -167,6 +171,8 @@ namespace dwave {
       void setCameraSettings(float px, float py, float pz, float ux, float uy, float uz);
 
       void setSceneSize(int width, int height);
+
+      void setGeometry(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 
       void startDwave(int argc, char** argv);
 
