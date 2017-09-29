@@ -15,7 +15,7 @@ namespace dwave {
     uSetViewMode = 0;
     uFilterType = 1;
 
-    g_stepSize = 256.0;
+    g_stepSize = 512.0;
     g_MinGrayVal = 103.0;
     g_MaxGrayVal = 1.0;
 
@@ -109,7 +109,7 @@ namespace dwave {
     Texture texture;
 
     // texture.initVol3DTex("../blArchie.raw", &pngTex, 320, 320, 1151);
-    texture.initVol3DTex(dataset_path, &pngTex, 320, 320, 1151);
+    texture.initVol3DTex(dataset_path, &pngTex, 1536, 1536, 1151);
 
     g_bfTexObj = initFace2DTex(g_texWidth, g_texHeight);
 
@@ -273,13 +273,13 @@ namespace dwave {
 
   void Dwave::initShader() {
     // vertex shader object for first pass
-    g_bfVertHandle = Shader::initShaderObj("firstPass.vert", GL_VERTEX_SHADER);
+    g_bfVertHandle = Shader::initShaderObj("../shader/firstPass.vert", GL_VERTEX_SHADER);
     // fragment shader object for first pass
-    g_bfFragHandle = Shader::initShaderObj("firstPass.frag", GL_FRAGMENT_SHADER);
+    g_bfFragHandle = Shader::initShaderObj("../shader/firstPass.frag", GL_FRAGMENT_SHADER);
     // vertex shader object for second pass
-    g_rcVertHandle = Shader::initShaderObj("secondPass.vert", GL_VERTEX_SHADER);
+    g_rcVertHandle = Shader::initShaderObj("../shader/secondPass.vert", GL_VERTEX_SHADER);
     // fragment shader object for second pass
-    g_rcFragHandle = Shader::initShaderObj("secondPassDVR.frag", GL_FRAGMENT_SHADER);
+    g_rcFragHandle = Shader::initShaderObj("../shader/secondPassDVR.frag", GL_FRAGMENT_SHADER);
     shader.createShaderPgm();
   }
 
@@ -402,8 +402,8 @@ namespace dwave {
     render(GL_BACK);
     glUseProgram(0);
 
-    screenshot_png("scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
-    glutLeaveMainLoop();
+    // screenshot_png("scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+    // glutLeaveMainLoop();
 
     glutSwapBuffers();
   }

@@ -6,7 +6,7 @@
 int main(int argc, char** argv) {
   // dwave::Dwave dwave;
   dwave::Dwave* dwave = new dwave::Dwave();
-  dwave->setDatasetPath("blArchie.raw");
+  dwave->setDatasetPath("../noisig_ntj.raw");
   dwave->startDwave(0, NULL);
   // std::thread first(&dwave::Dwave::startDwave, dwave, 0, argv);
   // for (int i = 3; i > 0; --i) {
