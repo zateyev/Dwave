@@ -101,6 +101,7 @@ namespace dwave {
       float angleY;
 
       float lastCam_pos;
+      bool is_image_ready;
 
       float cam_pos_x;
       float cam_pos_y;
@@ -177,6 +178,10 @@ namespace dwave {
       void startDwave(int argc, char** argv);
 
       void stopDwave();
+
+      void reset();
+
+      bool isImageReady();
 
       void calculateFrameRate();
 

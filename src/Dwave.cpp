@@ -41,6 +41,7 @@ namespace dwave {
     angleY = 0;
 
     lastCam_pos = 3.0f;
+    is_image_ready = false;
 
     cam_pos_x = 0.0f;
     cam_pos_y = 0.0f;
@@ -594,13 +595,14 @@ namespace dwave {
 
     // screenshot_png("scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
 
-    screenshot_png("static/img/scrshot.png", scr_width, scr_height, &pixels, &png_bytes, &png_rows);
-    glutLeaveMainLoop();
+    // screenshot_png("static/img/scrshot.png", scr_width, scr_height, &pixels, &png_bytes, &png_rows);
+    // glutLeaveMainLoop();
 
-    // if (lastCam_pos != cam_pos_x + cam_pos_y + cam_pos_z) {
-    //   screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
-    //   lastCam_pos = cam_pos_x + cam_pos_y + cam_pos_z;
-    // }
+    if (lastCam_pos != cam_pos_x + cam_pos_y + cam_pos_z) {
+      screenshot_png("static/img/scrshot.png", scr_width, scr_height, &pixels, &png_bytes, &png_rows);
+      lastCam_pos = cam_pos_x + cam_pos_y + cam_pos_z;
+      is_image_ready = true;
+    }
 
     // if (value2 != value1) {
     //   screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
@@ -653,7 +655,7 @@ namespace dwave {
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-    glutInitWindowPosition(1900, 1130);
+    glutInitWindowPosition(0, 0);
     glutInitWindowSize(scr_width + 100, scr_height); // (900, 800)
     // glutInitWindowSize(1920, 1045); // (900, 800)
 
@@ -798,6 +800,14 @@ namespace dwave {
     glutDestroyWindow(main_window);
   }
 
+  void Dwave::reset() {
+    is_image_ready = false;
+  }
+
+  bool Dwave::isImageReady() {
+    return is_image_ready;
+  }
+
   Dwave* Dwave::instance = NULL;
   GLubyte* Dwave::pixels = NULL;
   int Dwave::offscreen = 1;
@@ -832,5 +842,13 @@ extern "C" {
 
     void Dwave_stop(dwave::Dwave* dwave) {
       dwave->stopDwave();
+    }
+
+    void Dwave_reset(dwave::Dwave* dwave) {
+      dwave->reset();
+    }
+
+    bool Dwave_is_image_ready(dwave::Dwave* dwave) {
+      dwave->isImageReady();
     }
 }
