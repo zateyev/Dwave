@@ -1,7 +1,13 @@
+#version 300 es
 precision mediump int;
 precision mediump float;
-varying vec4 frontColor;
-varying vec4 pos;
+precision highp sampler3D;
+
+in vec4 frontColor;
+in vec4 pos;
+
+out vec4 fragColor;
+
 uniform sampler2D uBackCoord;
 uniform sampler3D uSliceMaps;
 // uniform sampler3D normalx;
@@ -78,8 +84,8 @@ vec3 getNormal(vec3 at) {
     texpos1.z = at.z - 1.0/zw;
     for (int i = 2, k = 0; i > -1; --i) {
       for (int j = 0; j < 3; j++) {
-        texpos1.x = at.x + (j - 1)/xw;
-        texpos1.y = at.y + (i - 1)/yw;
+        texpos1.x = at.x + float(j - 1)/xw;
+        texpos1.y = at.y + float(i - 1)/yw;
         L[k] = texture(uSliceMaps, texpos1).x;
         H[k++] = texture(uSliceMaps, vec3(texpos1.x, texpos1.y, at.z + 1.0/zw)).x;
       }
@@ -297,7 +303,7 @@ vec3 cookTorranceSpecular(
 
     //Fresnel term
     // float F = pow(1.0 - VdotH, fresnel);
-    float F = fresnel + (1 - fresnel) * pow(1.0 - VdotH, 5.0);
+    float F = fresnel + (1.0 - fresnel) * pow(1.0 - VdotH, 5.0);
 
     //Multiply terms
     power =  geoAtt * F * D / max(3.14159265 * NdotV * NdotL, 0.000001);
@@ -318,7 +324,7 @@ void main(void)
     vec4 currentPosition = frontColor;
     vec3 Step = dir/uSteps;
     vec4 accum = vec4(0.0);
-    vec4 sample = vec4(0.0);
+    vec4 samp = vec4(0.0);
     // vec3 lightPos[8];
     // lightPos[0] = vec3(1, 1, 1);
     // lightPos[1] = vec3(-1, -1, -1);
@@ -334,7 +340,8 @@ void main(void)
     // float ysqu;
     // float distanceFromCenter;
 
-    for(int i = 0; i < uSteps; i++) {
+    // for(int i = 0; i < uSteps; i++) {
+    for(int i = 0; i < 256; i++) {
       // xsqu = (0.5 - currentPosition.x) * (0.5 - currentPosition.x);
       // ysqu = (0.5 - currentPosition.y) * (0.5 - currentPosition.y);
       // distanceFromCenter = sqrt(xsqu + ysqu);
@@ -342,7 +349,7 @@ void main(void)
           currentPosition.x > xmin && currentPosition.x < xmax &&
           currentPosition.y > ymin && currentPosition.y < ymax &&
           currentPosition.z > zmin && currentPosition.z < zmax) {
-        float gray_val = texture(uSliceMaps, currentPosition.xyz);
+        float gray_val = texture(uSliceMaps, currentPosition.xyz).x;
         if (uFilterType != 0 && gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
           int mask_size = 3;
           if (uFilterType == 1) { // Mean Filtering
@@ -353,9 +360,12 @@ void main(void)
             for(int i = 0; i < mask_size; ++i) {
               for(int j = 0; j < mask_size; ++j) {
                 for(int k = 0; k < mask_size; ++k) {
-                  offset = vec3((i - (int)mask_size / 2) / xw,
-                      (j - (int)mask_size / 2) / yw,
-                      (k - (int)mask_size / 2) / zw);
+                  // offset = vec3((i - (int)mask_size / 2) / xw,
+                  //     (j - (int)mask_size / 2) / yw,
+                  //     (k - (int)mask_size / 2) / zw);
+                  offset = vec3(float(i - 1) / xw,
+                      float(j - 1) / yw,
+                      float(k - 1) / zw);
 
                   curDotPos = currentPosition.xyz + offset;
                   sum_gray_val += texture(uSliceMaps, curDotPos).x;
@@ -363,7 +373,7 @@ void main(void)
               }
             }
 
-            gray_val = sum_gray_val / pow(mask_size, 3);
+            gray_val = sum_gray_val / pow(float(mask_size), 3.0);
 
 
             // vec3 dirFromCP[14];
@@ -397,9 +407,12 @@ void main(void)
             for(int i = 0; i < mask_size; ++i) {
               for(int j = 0; j < mask_size; ++j) {
                 for(int k = 0; k < mask_size; ++k) {
-                  offset = vec3((i - (int)mask_size / 2) / xw,
-                      (j - (int)mask_size / 2) / yw,
-                      (k - (int)mask_size / 2) / zw);
+                  // offset = vec3((i - (int)mask_size / 2) / xw,
+                  //     (j - (int)mask_size / 2) / yw,
+                  //     (k - (int)mask_size / 2) / zw);
+                  offset = vec3(float(i - 1) / xw,
+                      float(j - 1) / yw,
+                      float(k - 1) / zw);
 
                   curDotPos = currentPosition.xyz + offset;
                   gray_values[neighbour_i] = texture(uSliceMaps, curDotPos).x;
@@ -431,7 +444,7 @@ void main(void)
 
         if (gray_val > uMinGrayVal && gray_val < uMaxGrayVal) {
           // normalize vectors after interpolation
-          vec3 V = normalize(pos - currentPosition.xyz);
+          vec3 V = normalize(pos.xyz - currentPosition.xyz);
 
           // float tx = texture(normalx, currentPosition.xyz).x * 255.0 - 127.0;
           // float ty = texture(normaly, currentPosition.xyz).x * 255.0 - 127.0;
@@ -453,30 +466,30 @@ void main(void)
               vec3 Iamb = ambientLighting();
               vec3 Idif = diffuseLighting(N, L);
               vec3 Ispe = specularLighting(N, L, V);
-              // sample.rgb += N;
-              sample.rgb += (Iamb + Idif + Ispe);
-              // sample.rgb += Iamb;
-              // sample.rgb += Idif;
-              // sample.rgb += Ispe;
+              // samp.rgb += N;
+              samp.rgb += (Iamb + Idif + Ispe);
+              // samp.rgb += Iamb;
+              // samp.rgb += Idif;
+              // samp.rgb += Ispe;
               // if (uValue3 == 1) {
-              //   sample.rgb += Iamb;
+              //   samp.rgb += Iamb;
               // }
               // else if (uValue3 == 2) {
-              //   sample.rgb += Idif;
+              //   samp.rgb += Idif;
               // }
               // else if (uValue3 == 3) {
-              //   sample.rgb += Ispe;
+              //   samp.rgb += Ispe;
               // }
               // else if (uValue3 == 4) {
-              //   sample.rgb += (Iamb + Idif + Ispe);
+              //   samp.rgb += (Iamb + Idif + Ispe);
               // }
             }
             else if(uSetViewMode == 1) { // Cook-Torrance mode
-              sample.rgb += cookTorranceSpecular(N, L, V, roughnessValue, F0, k);
+              samp.rgb += cookTorranceSpecular(N, L, V, roughnessValue, F0, k);
             }
           }
 
-          accum = sample;
+          accum = samp;
           // if(accum.a >= 1.0) break;
           break;
         }
@@ -488,7 +501,7 @@ void main(void)
       if(currentPosition.x > 1.0 || currentPosition.y > 1.0 || currentPosition.z > 1.0 || currentPosition.x < 0.0 || currentPosition.y < 0.0 || currentPosition.z < 0.0)
           break;
     }
-    gl_FragColor = accum;
+    fragColor = accum;
 
     // for test
     // gl_FragColor = vec4(frontColor.rgb, 1.0);

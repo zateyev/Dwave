@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.0)
 project (Dwave)
 set (CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS ${CMAKE_CSS_FLAGS} "-fPIC")
-set(CMAKE_BUILD_TYPE Release)
+# set(CMAKE_BUILD_TYPE Release)
 
 #Bring the headers into the project
 include_directories(include)
@@ -32,11 +32,11 @@ if (GLEW_FOUND)
   link_libraries(${GLEW_LIBRARIES})
 endif()
 
-set(glui_DIR /usr/lib/lib/cmake/glui/)
+set(glui_DIR /usr/lib/glui/lib/cmake/glui/)
 find_package(glui CONFIG REQUIRED)
 
 add_executable(main ${SOURCES})
-add_library(Dwave SHARED ${SOURCES})
+# add_library(Dwave SHARED ${SOURCES})
 
-target_link_libraries(main PUBLIC glui::glui) # ${ALL_LIBS})
-target_link_libraries(Dwave PUBLIC glui::glui)
+target_link_libraries(main glui::glui_static ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES}) # ${ALL_LIBS})
+# target_link_libraries(Dwave PUBLIC glui::glui)

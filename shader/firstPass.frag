@@ -1,9 +1,12 @@
-precision mediump int; 
-precision mediump float; 
+#version 300 es
+precision mediump int;
+precision mediump float;
 
-varying vec4 backColor; 
+in vec4 backColor;
 
-void main(void) 
-{ 
-    gl_FragColor = backColor; 
-} 
+out vec4 fragColor;
+
+void main(void)
+{
+    fragColor = backColor;
+}

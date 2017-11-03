@@ -19,7 +19,7 @@ namespace dwave {
     uSetViewMode = 0;
     uFilterType = 1;
 
-    g_stepSize = 512.0;
+    g_stepSize = 256.0;
     g_MinGrayVal = 103.0;
     g_MaxGrayVal = 255.0;
     // g_OpacityVal = 1.0;
@@ -41,6 +41,7 @@ namespace dwave {
     angleY = 0;
 
     lastCam_pos = 3.0f;
+    is_image_ready = false;
 
     cam_pos_x = 0.0f;
     cam_pos_y = 0.0f;
@@ -478,10 +479,10 @@ namespace dwave {
         << "\nLatency: " << 1000.0/double(framesPerSecond);
       string str = "FPS: " + stream.str();
 
-      char* cstr = new char[str.length() + 1];
-      strcpy(cstr, str.c_str());
-      fps_val->set_text(cstr);
-      delete [] cstr;
+      // char* cstr = new char[str.length() + 1];
+      // strcpy(cstr, str.c_str());
+      // fps_val->set_text(cstr);
+      // delete [] cstr;
 
       // lastTime++;
       lastTime = currentTime;
@@ -586,20 +587,21 @@ namespace dwave {
     render(GL_BACK);
     glUseProgram(0);
 
-    string str = "MinGrayVal: " + to_string((int)g_MinGrayVal);
-    char *cstr = new char[str.length() + 1];
-    strcpy(cstr, str.c_str());
-    min_gr_label->set_text(cstr);
-    delete [] cstr;
+    // string str = "MinGrayVal: " + to_string((int)g_MinGrayVal);
+    // char *cstr = new char[str.length() + 1];
+    // strcpy(cstr, str.c_str());
+    // min_gr_label->set_text(cstr);
+    // delete [] cstr;
 
     // screenshot_png("scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
 
-    screenshot_png("static/img/scrshot.png", scr_width, scr_height, &pixels, &png_bytes, &png_rows);
-    glutLeaveMainLoop();
+    // screenshot_png("static/img/scrshot.png", scr_width, scr_height, &pixels, &png_bytes, &png_rows);
+    // glutLeaveMainLoop();
 
     // if (lastCam_pos != cam_pos_x + cam_pos_y + cam_pos_z) {
-    //   screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
+    //   screenshot_png("static/img/scrshot.png", scr_width, scr_height, &pixels, &png_bytes, &png_rows);
     //   lastCam_pos = cam_pos_x + cam_pos_y + cam_pos_z;
+    //   is_image_ready = true;
     // }
 
     // if (value2 != value1) {
@@ -653,7 +655,7 @@ namespace dwave {
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-    glutInitWindowPosition(1900, 1130);
+    glutInitWindowPosition(0, 0);
     glutInitWindowSize(scr_width + 100, scr_height); // (900, 800)
     // glutInitWindowSize(1920, 1045); // (900, 800)
 
@@ -687,99 +689,99 @@ namespace dwave {
     /*** Create the side subwindow ***/
     glui = GLUI_Master.create_glui_subwindow(main_window, GLUI_SUBWINDOW_RIGHT);
 
-    // obj_panel = new GLUI_Rollout(glui, "Properties", false);
-    GLUI_Panel *obj_panel = new GLUI_Panel(glui, "");
-
-    /***** Control for object params *****/
-
-    GLUI_Scrollbar *sb;
-    GLUI_Separator *separator;
-
-    fps_val = new GLUI_StaticText(obj_panel, "120 FPS");
-
-    // separator = new GLUI_Separator(obj_panel);
-    // GLUI_StaticText *op_label = new GLUI_StaticText(obj_panel, "Opacity:");
-    // sb = new GLUI_Scrollbar(obj_panel, "Opacity", GLUI_SCROLL_HORIZONTAL, &g_OpacityVal);
-    // sb->set_float_limits(0, 40);
-
-    separator = new GLUI_Separator(obj_panel);
-
-    min_gr_label = new GLUI_StaticText(obj_panel, "MinGrayVal:");
-    // GLUI_Spinner* spinner = new GLUI_Spinner(obj_panel, "MinGrayVal:", &g_MinGrayVal);
-    // spinner->set_float_limits(0, 256.0);
-    // spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    // // obj_panel = new GLUI_Rollout(glui, "Properties", false);
+    // GLUI_Panel *obj_panel = new GLUI_Panel(glui, "");
+    //
+    // /***** Control for object params *****/
+    //
+    // GLUI_Scrollbar *sb;
+    // GLUI_Separator *separator;
+    //
+    // fps_val = new GLUI_StaticText(obj_panel, "120 FPS");
+    //
+    // // separator = new GLUI_Separator(obj_panel);
+    // // GLUI_StaticText *op_label = new GLUI_StaticText(obj_panel, "Opacity:");
+    // // sb = new GLUI_Scrollbar(obj_panel, "Opacity", GLUI_SCROLL_HORIZONTAL, &g_OpacityVal);
+    // // sb->set_float_limits(0, 40);
     //
     // separator = new GLUI_Separator(obj_panel);
-    sb = new GLUI_Scrollbar(obj_panel, "MinGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MinGrayVal);
-    sb->set_float_limits(0, 255.0);
-
-    separator = new GLUI_Separator(obj_panel);
-    GLUI_StaticText *max_gr_label = new GLUI_StaticText(obj_panel, "MaxGrayVal:");
-    sb = new GLUI_Scrollbar(obj_panel, "MaxGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MaxGrayVal);
-    sb->set_float_limits(0, 255.0);
-
+    //
+    // min_gr_label = new GLUI_StaticText(obj_panel, "MinGrayVal:");
+    // // GLUI_Spinner* spinner = new GLUI_Spinner(obj_panel, "MinGrayVal:", &g_MinGrayVal);
+    // // spinner->set_float_limits(0, 256.0);
+    // // spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    // //
+    // // separator = new GLUI_Separator(obj_panel);
+    // sb = new GLUI_Scrollbar(obj_panel, "MinGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MinGrayVal);
+    // sb->set_float_limits(0, 255.0);
+    //
     // separator = new GLUI_Separator(obj_panel);
-    // GLUI_StaticText *color_val_label = new GLUI_StaticText(obj_panel, "ColorVal:");
-    // sb = new GLUI_Scrollbar(obj_panel, "ColorVal", GLUI_SCROLL_HORIZONTAL, &g_ColorVal);
+    // GLUI_StaticText *max_gr_label = new GLUI_StaticText(obj_panel, "MaxGrayVal:");
+    // sb = new GLUI_Scrollbar(obj_panel, "MaxGrayVal", GLUI_SCROLL_HORIZONTAL, &g_MaxGrayVal);
+    // sb->set_float_limits(0, 255.0);
+    //
+    // // separator = new GLUI_Separator(obj_panel);
+    // // GLUI_StaticText *color_val_label = new GLUI_StaticText(obj_panel, "ColorVal:");
+    // // sb = new GLUI_Scrollbar(obj_panel, "ColorVal", GLUI_SCROLL_HORIZONTAL, &g_ColorVal);
+    // // sb->set_float_limits(0, 1.0);
+    //
+    // separator = new GLUI_Separator(obj_panel);
+    // GLUI_Spinner* spinner = new GLUI_Spinner(obj_panel, "StepSize:", &g_stepSize);
+    // spinner->set_float_limits(0, 2048.0);
+    // spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    // // sb = new GLUI_Scrollbar(obj_panel, "StepSize", GLUI_SCROLL_HORIZONTAL, &g_stepSize);
+    // // sb->set_float_limits(0, 2024.0);
+    //
+    // // separator = new GLUI_Separator(obj_panel);
+    // // spinner = new GLUI_Spinner(obj_panel, "Cylinder rad:", &cyl_rad);
+    // // spinner->set_float_limits(0, 0.7);
+    // // spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    //
+    // /**** Add listbox ****/
+    // new GLUI_StaticText( glui, "" );
+    // GLUI_Listbox *list = new GLUI_Listbox( glui, "View mode:", &uSetViewMode );
+    // list->add_item(0, "Blinn-Phong shading");
+    // list->add_item(1, "Cook-Torrance");
+    //
+    // new GLUI_StaticText( glui, "" );
+    // GLUI_Listbox *filters = new GLUI_Listbox( glui, "Filter type:", &uFilterType );
+    // filters->add_item(0, "None");
+    // filters->add_item(1, "Mean Filtering");
+    // filters->add_item(2, "Median Filtering");
+    //
+    // separator = new GLUI_Separator(obj_panel);
+    // spinner = new GLUI_Spinner(obj_panel, "Take a screenshot:", &value1);
+    // spinner->set_float_limits(0.1, 0.9);
+    // spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    // //
+    // // separator = new GLUI_Separator(obj_panel);
+    // // spinner = new GLUI_Spinner(obj_panel, "Reflectance:", &value2);
+    // // spinner->set_float_limits(1.0, 10.0);
+    // // spinner->set_alignment(GLUI_ALIGN_RIGHT);
+    //
+    // separator = new GLUI_Separator(obj_panel);
+    // GLUI_StaticText *c_rad_label = new GLUI_StaticText(obj_panel, "Cylinder rad:");
+    // sb = new GLUI_Scrollbar(obj_panel, "Cylinder rad", GLUI_SCROLL_HORIZONTAL, &cyl_rad);
+    // sb->set_float_limits(0, 0.5);
+    //
+    // separator = new GLUI_Separator(obj_panel);
+    // GLUI_StaticText *z_bottom = new GLUI_StaticText(obj_panel, "Z bottom:");
+    // sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zmin);
     // sb->set_float_limits(0, 1.0);
-
-    separator = new GLUI_Separator(obj_panel);
-    GLUI_Spinner* spinner = new GLUI_Spinner(obj_panel, "StepSize:", &g_stepSize);
-    spinner->set_float_limits(0, 2048.0);
-    spinner->set_alignment(GLUI_ALIGN_RIGHT);
-    // sb = new GLUI_Scrollbar(obj_panel, "StepSize", GLUI_SCROLL_HORIZONTAL, &g_stepSize);
-    // sb->set_float_limits(0, 2024.0);
-
-    // separator = new GLUI_Separator(obj_panel);
-    // spinner = new GLUI_Spinner(obj_panel, "Cylinder rad:", &cyl_rad);
-    // spinner->set_float_limits(0, 0.7);
-    // spinner->set_alignment(GLUI_ALIGN_RIGHT);
-
-    /**** Add listbox ****/
-    new GLUI_StaticText( glui, "" );
-    GLUI_Listbox *list = new GLUI_Listbox( glui, "View mode:", &uSetViewMode );
-    list->add_item(0, "Blinn-Phong shading");
-    list->add_item(1, "Cook-Torrance");
-
-    new GLUI_StaticText( glui, "" );
-    GLUI_Listbox *filters = new GLUI_Listbox( glui, "Filter type:", &uFilterType );
-    filters->add_item(0, "None");
-    filters->add_item(1, "Mean Filtering");
-    filters->add_item(2, "Median Filtering");
-
-    separator = new GLUI_Separator(obj_panel);
-    spinner = new GLUI_Spinner(obj_panel, "Take a screenshot:", &value1);
-    spinner->set_float_limits(0.1, 0.9);
-    spinner->set_alignment(GLUI_ALIGN_RIGHT);
     //
     // separator = new GLUI_Separator(obj_panel);
-    // spinner = new GLUI_Spinner(obj_panel, "Reflectance:", &value2);
-    // spinner->set_float_limits(1.0, 10.0);
+    // GLUI_StaticText *z_top = new GLUI_StaticText(obj_panel, "Z top:");
+    // sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zmax);
+    // sb->set_float_limits(0, 1.0);
+    //
+    // separator = new GLUI_Separator(obj_panel);
+    // spinner = new GLUI_Spinner(obj_panel, "Lights number:", &value3);
+    // spinner->set_int_limits(0, 8);
     // spinner->set_alignment(GLUI_ALIGN_RIGHT);
-
-    separator = new GLUI_Separator(obj_panel);
-    GLUI_StaticText *c_rad_label = new GLUI_StaticText(obj_panel, "Cylinder rad:");
-    sb = new GLUI_Scrollbar(obj_panel, "Cylinder rad", GLUI_SCROLL_HORIZONTAL, &cyl_rad);
-    sb->set_float_limits(0, 0.5);
-
-    separator = new GLUI_Separator(obj_panel);
-    GLUI_StaticText *z_bottom = new GLUI_StaticText(obj_panel, "Z bottom:");
-    sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zmin);
-    sb->set_float_limits(0, 1.0);
-
-    separator = new GLUI_Separator(obj_panel);
-    GLUI_StaticText *z_top = new GLUI_StaticText(obj_panel, "Z top:");
-    sb = new GLUI_Scrollbar(obj_panel, "Z bottom", GLUI_SCROLL_HORIZONTAL, &zmax);
-    sb->set_float_limits(0, 1.0);
-
-    separator = new GLUI_Separator(obj_panel);
-    spinner = new GLUI_Spinner(obj_panel, "Lights number:", &value3);
-    spinner->set_int_limits(0, 8);
-    spinner->set_alignment(GLUI_ALIGN_RIGHT);
 
     init();
 
-    glui->set_main_gfx_window(main_window);
+    // glui->set_main_gfx_window(main_window);
 
     // delete obj_panel;
     // delete separator;
@@ -796,6 +798,14 @@ namespace dwave {
   void Dwave::stopDwave() {
     cout << "stop Dwave" << endl;
     glutDestroyWindow(main_window);
+  }
+
+  void Dwave::reset() {
+    is_image_ready = false;
+  }
+
+  bool Dwave::isImageReady() {
+    return is_image_ready;
   }
 
   Dwave* Dwave::instance = NULL;
@@ -832,5 +842,13 @@ extern "C" {
 
     void Dwave_stop(dwave::Dwave* dwave) {
       dwave->stopDwave();
+    }
+
+    void Dwave_reset(dwave::Dwave* dwave) {
+      dwave->reset();
+    }
+
+    bool Dwave_is_image_ready(dwave::Dwave* dwave) {
+      dwave->isImageReady();
     }
 }

@@ -1,13 +1,14 @@
+#version 300 es
 precision mediump int;
 precision mediump float;
 
-attribute vec4 vertColor;
+in vec4 vertColor;
 
-attribute vec3 position; // VerPos
+in vec3 position; // VerPos
 uniform mat4 MVP;
 
-varying vec4 frontColor;
-varying vec4 pos;
+out vec4 frontColor;
+out vec4 pos;
 
 void main(void)
 {

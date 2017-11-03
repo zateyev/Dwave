@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
+// #include <GL/glui.h>
 #include <GL/glew.h>
 // #include <GL/glext.h>
 // #include <GL/glut.h>
@@ -19,7 +20,7 @@
 #include "texture.hpp"
 #include "shader.hpp"
 
-// #pragma comment(lib, "/usr/lib/lib/libglui.so")
+// #pragma comment(lib, "glui.lib")
 #include "glui.h"
 
 #include <iomanip> // setprecision
@@ -101,6 +102,7 @@ namespace dwave {
       float angleY;
 
       float lastCam_pos;
+      bool is_image_ready;
 
       float cam_pos_x;
       float cam_pos_y;
@@ -177,6 +179,10 @@ namespace dwave {
       void startDwave(int argc, char** argv);
 
       void stopDwave();
+
+      void reset();
+
+      bool isImageReady();
 
       void calculateFrameRate();
 
