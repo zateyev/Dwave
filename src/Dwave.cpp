@@ -598,11 +598,19 @@ namespace dwave {
     // screenshot_png("static/img/scrshot.png", scr_width, scr_height, &pixels, &png_bytes, &png_rows);
     // glutLeaveMainLoop();
 
+<<<<<<< HEAD
     // if (lastCam_pos != cam_pos_x + cam_pos_y + cam_pos_z) {
     //   screenshot_png("static/img/scrshot.png", scr_width, scr_height, &pixels, &png_bytes, &png_rows);
     //   lastCam_pos = cam_pos_x + cam_pos_y + cam_pos_z;
     //   is_image_ready = true;
     // }
+=======
+    if (lastCam_pos != cam_pos_x + cam_pos_y + cam_pos_z) {
+      screenshot_png("static/img/scrshot.png", scr_width, scr_height, &pixels, &png_bytes, &png_rows);
+      lastCam_pos = cam_pos_x + cam_pos_y + cam_pos_z;
+      is_image_ready = true;
+    }
+>>>>>>> cb42f7c5408b0e2d049168eb677467dc509ffe47
 
     // if (value2 != value1) {
     //   screenshot_png("static/img/scrshot.png", WIDTH, HEIGHT, &pixels, &png_bytes, &png_rows);
